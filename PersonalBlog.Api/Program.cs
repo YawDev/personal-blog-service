@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using PersonalBlog.Infrastructure;
 // using PersonalBlog.Infrastructure.DbContext;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -9,8 +10,8 @@ builder.Services.AddOpenApi();
 
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 
-// builder.Services.AddDbContext<PersonalBlogDbContext>(options =>
-//     options.UseNpgsql(connectionString));
+builder.Services.AddDbContext<PersonalBlogDbContext>(options =>
+    options.UseNpgsql(connectionString));
 
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://microsoft.com
