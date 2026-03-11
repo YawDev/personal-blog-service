@@ -1,10 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using Microsoft.EntityFrameworkCore;
+﻿
 
-namespace PersonalBlog.Models.DatabaseModels;
+namespace PersonalBlog.Infrastructure.DbContext;
 
-public partial class PersonalBlogDbContext : DbContext
+public partial class PersonalBlogDbContext : IdentityDbContext<ApplicationUser, IdentityRole<Guid>, Guid>
 {
     public PersonalBlogDbContext()
     {
