@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
-using PersonalBlog.Models.DatabaseModels;
+using PersonalBlog.Infrastructure;
+// using PersonalBlog.Infrastructure.DbContext;
 
 var builder = WebApplication.CreateBuilder(args);
 
