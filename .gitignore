@@ -53,3 +53,6 @@ CodeCoverage/
 TestResult.xml
 nunit-*.xml
 .vscode/launch.json
+PersonalBlog.Api/appsettings.Development.json
+.vscode/tasks.json
+.vscode/tasks.json
