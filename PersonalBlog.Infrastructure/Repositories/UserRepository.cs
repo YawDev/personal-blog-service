@@ -2,11 +2,12 @@ using System.Data.Entity;
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
 using PersonalBlog.Core.Dtos;
+using PersonalBlog.Core.Interfaces.Repositories;
 using PersonalBlog.Models.DatabaseModels;
 
 namespace PersonalBlog.Infrastructure.Repositories
 {
-    public class UserRepository(PersonalBlogDbContext context, IMapper mapper)
+    public class UserRepository(PersonalBlogDbContext context, IMapper mapper) : IUserRepository
     {
         private readonly PersonalBlogDbContext _context = context;
         private readonly IMapper _mapper = mapper;
