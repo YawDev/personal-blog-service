@@ -1,4 +1,5 @@
 using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using PersonalBlog.Api.ActionFilters;
@@ -18,7 +19,7 @@ namespace PersonalBlog.Api.Controllers
         private readonly IAuthenticationService _authenticationService = authenticationService;
         private readonly IMapper _mapper = mapper;
 
-
+        [AllowAnonymous]
         [HttpPost("auth/login")]
         public async Task<IActionResult> Login([FromBody] LoginRequest request)
         {
@@ -27,7 +28,8 @@ namespace PersonalBlog.Api.Controllers
             await _signInManager.SignInAsync(user, isPersistent: false);
             return Ok(new { User = _mapper.Map<IdentityUserDTO>(user), Token = token });
         }
-
+        
+        [AllowAnonymous]
         [HttpPost("auth/register")]
         public async Task<IActionResult> Register([FromBody] RegisterRequest request)
         {

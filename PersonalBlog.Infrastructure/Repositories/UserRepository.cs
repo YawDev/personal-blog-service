@@ -1,6 +1,6 @@
-using System.Data.Entity;
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
+using Microsoft.EntityFrameworkCore;
 using PersonalBlog.Core.Dtos;
 using PersonalBlog.Core.Interfaces.Repositories;
 using PersonalBlog.Models.DatabaseModels;

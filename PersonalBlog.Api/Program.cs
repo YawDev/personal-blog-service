@@ -19,6 +19,14 @@ var builder = WebApplication.CreateBuilder(args);
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
 
+var jwtKey = builder.Configuration["Jwt:Key"];
+var jwtIssuer = builder.Configuration["Jwt:Issuer"];
+var jwtAudience = builder.Configuration["Jwt:Audience"];
+
+Console.WriteLine($"Jwt:Key loaded? {!string.IsNullOrWhiteSpace(jwtKey)}");
+Console.WriteLine($"Jwt:Issuer loaded? {!string.IsNullOrWhiteSpace(jwtIssuer)}");
+Console.WriteLine($"Jwt:Audience loaded? {!string.IsNullOrWhiteSpace(jwtAudience)}");
+
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 
 builder.Services.AddDbContext<PersonalBlogDbContext>(options =>
@@ -58,16 +66,16 @@ builder.Services.AddAuthentication(options =>
     })
     .AddJwtBearer(options =>
     {
-        // options.TokenValidationParameters = new TokenValidationParameters
-        // {
-        //     ValidateIssuer = true,
-        //     ValidateAudience = true,
-        //     ValidateLifetime = true,
-        //     ValidateIssuerSigningKey = true,
-        //     ValidIssuer = builder.Configuration["Jwt:Issuer"],
-        //     ValidAudience = builder.Configuration["Jwt:Audience"],
-        //     IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]?? throw new InvalidOperationException("JWT Key not configured")))
-        // };
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuer = true,
+            ValidateAudience = true,
+            ValidateLifetime = true,
+            ValidateIssuerSigningKey = true,
+            ValidIssuer = builder.Configuration["Jwt:Issuer"],
+            ValidAudience = builder.Configuration["Jwt:Audience"],
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]?? throw new InvalidOperationException("JWT Key not configured")))
+        };
     });
 
 
