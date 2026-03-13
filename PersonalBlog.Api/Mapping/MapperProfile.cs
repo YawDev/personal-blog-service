@@ -17,9 +17,12 @@ namespace PersonalBlog.Api.Mapping
             CreateMap<LoginRequest, AuthenticateIdentityDTO>()
                .ForMember(dest => dest.UserName, opt => opt.MapFrom(src => src.UserName.Trim()));
 
-            CreateMap<ApplicationUser, IdentityUserDTO>();
+            CreateMap<ApplicationUser, IdentityUserDTO>().ReverseMap();
 
-            CreateMap<BlogUser, BlogUserDTO>();
+            CreateMap<BlogUser, BlogUserDTO>().ReverseMap();
+
+            CreateMap<Post, PostDTO>().ReverseMap();
+            CreateMap<Draft, DraftDTO>().ReverseMap();
         }
     }
 }

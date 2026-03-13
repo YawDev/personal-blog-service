@@ -56,3 +56,5 @@ nunit-*.xml
 PersonalBlog.Api/appsettings.Development.json
 .vscode/tasks.json
 .vscode/tasks.json
+.vscode/tasks.json
+PersonalBlog.Api/appsettings.Development.json

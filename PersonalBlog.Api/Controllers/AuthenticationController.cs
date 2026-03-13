@@ -11,6 +11,7 @@ using PersonalBlog.Models.Dtos;
 
 namespace PersonalBlog.Api.Controllers
 {
+
     [ApiController]
     [Route("api")]
     public class AuthenticationController(IAuthenticationService authenticationService, IMapper mapper, SignInManager<ApplicationUser> signInManager) : ControllerBase
@@ -28,7 +29,7 @@ namespace PersonalBlog.Api.Controllers
             await _signInManager.SignInAsync(user, isPersistent: false);
             return Ok(new { User = _mapper.Map<IdentityUserDTO>(user), Token = token });
         }
-        
+
         [AllowAnonymous]
         [HttpPost("auth/register")]
         public async Task<IActionResult> Register([FromBody] RegisterRequest request)

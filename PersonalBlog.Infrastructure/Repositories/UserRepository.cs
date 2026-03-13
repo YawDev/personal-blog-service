@@ -6,7 +6,7 @@ using PersonalBlog.Core.Interfaces.Repositories;
 using PersonalBlog.Models.DatabaseModels;
 
 namespace PersonalBlog.Infrastructure.Repositories
-{
+{  
     public class UserRepository(PersonalBlogDbContext context, IMapper mapper) : IUserRepository
     {
         private readonly PersonalBlogDbContext _context = context;
