@@ -3,10 +3,13 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Models;
 using PersonalBlog.Api.Mapping;
 using PersonalBlog.Api.Middleware;
 using PersonalBlog.Core.AuthContext;
+using PersonalBlog.Core.BusinessContext;
 using PersonalBlog.Core.Interfaces;
+using PersonalBlog.Core.Interfaces.Business;
 using PersonalBlog.Core.Interfaces.Repositories;
 using PersonalBlog.Infrastructure;
 using PersonalBlog.Infrastructure.Repositories;
@@ -35,8 +38,39 @@ builder.Services.AddDbContext<PersonalBlogDbContext>(options =>
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://microsoft.com
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(options =>
+{
+    options.SwaggerDoc("v1", new OpenApiInfo
+    {
+        Title = "PersonalBlog API",
+        Version = "v1"
+    });
 
+    options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+    {
+        Name = "Authorization",
+        Type = SecuritySchemeType.Http,
+        Scheme = "bearer",
+        BearerFormat = "JWT",
+        In = ParameterLocation.Header,
+        Description = "Enter token only. Example: eyJhbGciOi..."
+    });
+
+    options.AddSecurityRequirement(new OpenApiSecurityRequirement
+    {
+        {
+            new OpenApiSecurityScheme
+            {
+                Reference = new OpenApiReference
+                {
+                    Type = ReferenceType.SecurityScheme,
+                    Id = "Bearer"
+                }
+            },
+            Array.Empty<string>()
+        }
+    });
+});
 // Configure ASP.NET Core Identity with Guid keys
 builder.Services.AddIdentity<ApplicationUser, IdentityRole<Guid>>(options =>
 {
@@ -80,11 +114,14 @@ builder.Services.AddAuthentication(options =>
 
 
 // Register application services for dependency injection
+builder.Services.AddScoped<IBlogService, BlogService>();
 builder.Services.AddScoped<IUserIdentityService, UserIdentityService>();
 builder.Services.AddScoped<IAuthenticationService, AuthenticationService>();
 builder.Services.AddScoped<ITokenService, TokenService>();
 // Register Repositories for dependency injection
 builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped<IBlogRepository, BlogRepository>();
+builder.Services.AddScoped<IDraftRepository, DraftRepository>();
 
 
 // Register AutoMapper

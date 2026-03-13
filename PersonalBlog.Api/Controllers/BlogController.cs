@@ -1,8 +1,11 @@
 using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using PersonalBlog.Api.ActionFilters;
+using PersonalBlog.Api.Contracts.Request;
 using PersonalBlog.Core.Dtos.ResponseDtos;
 using PersonalBlog.Core.Interfaces.Business;
+using PersonalBlog.Models.Dtos;
 
 namespace PersonalBlog.Api.Controllers
 {
@@ -33,6 +36,16 @@ namespace PersonalBlog.Api.Controllers
             }
             var response = _mapper.Map<GetBlogByIdResponseDTO>(blog);
             return Ok(response);
+        }
+
+        [IdentityFilter]
+        [HttpPost("/blogs/create/{id}")]
+        public async Task<IActionResult> CreateBlog(Guid id, [FromBody] CreateBlogRequest createBlogRequest)
+        {
+            var createBlogDTO = _mapper.Map<CreateBlogDTO>(createBlogRequest);
+            
+            var response = await _blogService.CreatePostAsync(createBlogDTO, id);
+            return Ok(response);            
         }
     }
 }

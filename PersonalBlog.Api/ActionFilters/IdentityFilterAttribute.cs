@@ -1,3 +1,4 @@
+using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using Microsoft.AspNetCore.Mvc.Filters;
 using PersonalBlog.Core.Exceptions;
@@ -17,7 +18,14 @@ namespace PersonalBlog.Api.ActionFilters
             }
 
             // Get the currently signed-in user's ID from claims
-            var signedInUserIdClaim = context.HttpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            // var signedInUserIdClaim = context.HttpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            var signedInUserIdClaim = context.HttpContext.User.Claims
+                .Where(c =>
+                    c.Type == ClaimTypes.NameIdentifier ||
+                    c.Type == JwtRegisteredClaimNames.Sub ||
+                    c.Type == "sub")
+                .Select(c => c.Value)
+                .FirstOrDefault(v => Guid.TryParse(v, out _));
 
             if (string.IsNullOrEmpty(signedInUserIdClaim) || !Guid.TryParse(signedInUserIdClaim, out Guid signedInUserId))
             {

@@ -4,6 +4,6 @@ namespace PersonalBlog.Core.Dtos.ResponseDtos
 {
     public class GetAllBlogsResponseDTO
     {
-        public List<PostDTO> Blogs { get; set; } = null!;
+        public List<BlogResponseDTO> Blogs { get; set; } = null!;
     }
 }

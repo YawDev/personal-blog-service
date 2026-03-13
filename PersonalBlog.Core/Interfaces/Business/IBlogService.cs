@@ -6,7 +6,7 @@ namespace PersonalBlog.Core.Interfaces.Business
 {
     public interface IBlogService
     {
-        public Task<SaveBlogResponseDTO> CreatePostAsync(PostDTO postDto);
+        public Task<SaveBlogResponseDTO> CreatePostAsync(CreateBlogDTO createBlogDTO, Guid userGuid);
         public Task<DeleteBlogResponseDTO> DeletePostAsync(Guid postId);
         public Task<GetBlogByIdResponseDTO?> GetPostByIdAsync(Guid postId);
         public Task<GetAllBlogsResponseDTO> GetAllPostsAsync();

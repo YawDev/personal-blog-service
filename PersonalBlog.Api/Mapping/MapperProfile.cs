@@ -10,6 +10,7 @@ namespace PersonalBlog.Api.Mapping
     {
         public MapperProfile()
         {
+            #region Request Models to DTOs
             CreateMap<RegisterRequest, CreateIdentityDTO>()
                 .ForMember(dest => dest.UserName, opt => opt.MapFrom(src => src.UserName.Trim()))
                 .ForMember(dest => dest.Email, opt => opt.MapFrom(src => src.Email.ToLower()));
@@ -17,12 +18,19 @@ namespace PersonalBlog.Api.Mapping
             CreateMap<LoginRequest, AuthenticateIdentityDTO>()
                .ForMember(dest => dest.UserName, opt => opt.MapFrom(src => src.UserName.Trim()));
 
+            CreateMap<CreateBlogRequest, CreateBlogDTO>()
+               .ForMember(dest => dest.UserGuid, opt => opt.MapFrom(src => src.UserGuid.Trim()));
+            #endregion
+
+            #region Database Models to DTOs
             CreateMap<ApplicationUser, IdentityUserDTO>().ReverseMap();
 
             CreateMap<BlogUser, BlogUserDTO>().ReverseMap();
 
             CreateMap<Post, PostDTO>().ReverseMap();
             CreateMap<Draft, DraftDTO>().ReverseMap();
+            #endregion
+            
         }
     }
 }
