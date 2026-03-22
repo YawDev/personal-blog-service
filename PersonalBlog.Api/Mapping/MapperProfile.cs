@@ -1,6 +1,8 @@
 using AutoMapper;
 using PersonalBlog.Api.Contracts.Request;
+using PersonalBlog.Api.Contracts.Response.Blogs;
 using PersonalBlog.Core.Dtos;
+using PersonalBlog.Core.Dtos.ResponseDtos;
 using PersonalBlog.Models.DatabaseModels;
 using PersonalBlog.Models.Dtos;
 
@@ -20,6 +22,13 @@ namespace PersonalBlog.Api.Mapping
 
             CreateMap<CreateBlogRequest, CreateBlogDTO>()
                .ForMember(dest => dest.UserGuid, opt => opt.MapFrom(src => src.UserGuid.Trim()));
+            #endregion
+
+            #region DTOs to Response Models
+            CreateMap<BlogResponseDTO, BlogResponseDTO>();
+            CreateMap<GetAllBlogsResponseDTO, GetAllBlogsResponse>();
+            CreateMap<SaveBlogResponse, SaveBlogResponseDTO>();
+            CreateMap<GetBlogByIdResponse, GetBlogByIdResponseDTO>();
             #endregion
 
             #region Database Models to DTOs

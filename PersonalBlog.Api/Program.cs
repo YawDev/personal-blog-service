@@ -42,7 +42,7 @@ builder.Services.AddSwaggerGen(options =>
 {
     options.SwaggerDoc("v1", new OpenApiInfo
     {
-        Title = "PersonalBlog API",
+        Title = "PersonalBlog.Api",
         Version = "v1"
     });
 
@@ -108,9 +108,20 @@ builder.Services.AddAuthentication(options =>
             ValidateIssuerSigningKey = true,
             ValidIssuer = builder.Configuration["Jwt:Issuer"],
             ValidAudience = builder.Configuration["Jwt:Audience"],
-            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]?? throw new InvalidOperationException("JWT Key not configured")))
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"] ?? throw new InvalidOperationException("JWT Key not configured")))
         };
     });
+    
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowFrontend",
+        policy =>
+        {
+            policy.WithOrigins("http://localhost:3000") 
+                  .AllowAnyHeader()
+                  .AllowAnyMethod();
+        });
+});
 
 
 // Register application services for dependency injection
@@ -144,6 +155,8 @@ if (app.Environment.IsDevelopment())
 
 app.UseMiddleware<ExceptionHandlingMiddleware>(); // Centralized Exception handling
 app.UseHttpsRedirection();
+app.UseRouting();
+app.UseCors("AllowFrontend"); 
 app.UseAuthentication(); // Enables authentication middleware (must come before Authorization)
 app.UseAuthorization(); // Enables authorization middleware
 app.MapControllers(); // Maps controller routes for controller-based APIs

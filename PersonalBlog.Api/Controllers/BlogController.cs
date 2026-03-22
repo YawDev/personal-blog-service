@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using PersonalBlog.Api.ActionFilters;
 using PersonalBlog.Api.Contracts.Request;
+using PersonalBlog.Api.Contracts.Response.Blogs;
 using PersonalBlog.Core.Dtos.ResponseDtos;
 using PersonalBlog.Core.Interfaces.Business;
 using PersonalBlog.Models.Dtos;
@@ -21,7 +22,7 @@ namespace PersonalBlog.Api.Controllers
         public async Task<IActionResult> GetAllBlogs()
         {
             var blogs = await _blogService.GetAllPostsAsync();
-            var response = _mapper.Map<GetAllBlogsResponseDTO>(blogs);
+            var response = _mapper.Map<GetAllBlogsResponse>(blogs);
             return Ok(response);
         }
 
@@ -34,7 +35,7 @@ namespace PersonalBlog.Api.Controllers
             {
                 return NotFound();
             }
-            var response = _mapper.Map<GetBlogByIdResponseDTO>(blog);
+            var response = _mapper.Map<GetBlogByIdResponse>(blog);
             return Ok(response);
         }
 
@@ -43,8 +44,11 @@ namespace PersonalBlog.Api.Controllers
         public async Task<IActionResult> CreateBlog(Guid id, [FromBody] CreateBlogRequest createBlogRequest)
         {
             var createBlogDTO = _mapper.Map<CreateBlogDTO>(createBlogRequest);
+
+            var createdBlog = await _blogService.CreatePostAsync(createBlogDTO, id);
             
-            var response = await _blogService.CreatePostAsync(createBlogDTO, id);
+            var response = _mapper.Map<SaveBlogResponse>(createdBlog);
+
             return Ok(response);            
         }
     }

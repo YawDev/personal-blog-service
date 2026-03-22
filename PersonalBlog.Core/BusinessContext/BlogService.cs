@@ -88,9 +88,28 @@ namespace PersonalBlog.Core.BusinessContext
             throw new NotImplementedException();
         }
 
-        public Task<GetBlogByIdResponseDTO?> GetPostByIdAsync(Guid postId)
+        public async Task<GetBlogByIdResponseDTO?> GetPostByIdAsync(Guid postId)
         {
-            throw new NotImplementedException();
+            var post = await _blogRepository.GetByIdAsync(postId);
+            
+            if(post == null)
+            {
+                throw new Exception("Post not found");
+            }
+            
+            return new GetBlogByIdResponseDTO
+            {
+                Blog = new BlogResponseDTO
+                {
+                    Id = post.Id,
+                    Title = post.Title,
+                    Content = post.Content,
+                    Preview = post.Preview,
+                    DatePosted = post.Dateposted,
+                    UserId = post.Userid
+                }
+            };
+            
         }
 
         public Task<SaveDraftResponseDTO> UpdateDraftAsync(DraftDTO draftDto)
