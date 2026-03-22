@@ -1,10 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
+﻿
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using PersonalBlog.Models.DatabaseModels;
-using PersonalBlog.Models.Enums;
 
 namespace PersonalBlog.Infrastructure;
 
@@ -24,10 +22,7 @@ public partial class PersonalBlogDbContext : IdentityDbContext<ApplicationUser, 
     public virtual DbSet<Draft> Drafts { get; set; }
 
     public virtual DbSet<Post> Posts { get; set; }
-
-    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-#warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see https://go.microsoft.com/fwlink/?LinkId=723263.
-        => optionsBuilder.UseNpgsql("Host=localhost;Port=5432;Database=personal-blog-db;Username=postgres;");
+    public virtual DbSet<ApplicationUser> ApplicationUsers { get; set; }
 
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
