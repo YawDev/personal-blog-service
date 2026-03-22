@@ -3,7 +3,6 @@ namespace PersonalBlog.Api.Contracts.Request
 
     public class CreateBlogRequest
     {
-        public string UserGuid { get; set; }
         public string Title { get; set; } = null!;
 
         public string Content { get; set; } = null!;

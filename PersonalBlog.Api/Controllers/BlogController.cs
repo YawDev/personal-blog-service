@@ -4,7 +4,6 @@ using Microsoft.AspNetCore.Mvc;
 using PersonalBlog.Api.ActionFilters;
 using PersonalBlog.Api.Contracts.Request;
 using PersonalBlog.Api.Contracts.Response.Blogs;
-using PersonalBlog.Core.Dtos.ResponseDtos;
 using PersonalBlog.Core.Interfaces.Business;
 using PersonalBlog.Models.Dtos;
 

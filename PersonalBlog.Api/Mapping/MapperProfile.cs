@@ -20,15 +20,14 @@ namespace PersonalBlog.Api.Mapping
             CreateMap<LoginRequest, AuthenticateIdentityDTO>()
                .ForMember(dest => dest.UserName, opt => opt.MapFrom(src => src.UserName.Trim()));
 
-            CreateMap<CreateBlogRequest, CreateBlogDTO>()
-               .ForMember(dest => dest.UserGuid, opt => opt.MapFrom(src => src.UserGuid.Trim()));
+            CreateMap<CreateBlogRequest, CreateBlogDTO>();
             #endregion
 
             #region DTOs to Response Models
-            CreateMap<BlogResponseDTO, BlogResponseDTO>();
+            CreateMap<BlogResponseDTO, BlogResponse>();
             CreateMap<GetAllBlogsResponseDTO, GetAllBlogsResponse>();
-            CreateMap<SaveBlogResponse, SaveBlogResponseDTO>();
-            CreateMap<GetBlogByIdResponse, GetBlogByIdResponseDTO>();
+            CreateMap<SaveBlogResponseDTO, SaveBlogResponse>();
+            CreateMap<GetBlogByIdResponseDTO, GetBlogByIdResponse>();
             #endregion
 
             #region Database Models to DTOs
