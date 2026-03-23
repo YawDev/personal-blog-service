@@ -28,17 +28,17 @@ namespace PersonalBlog.Api.Mapping
             CreateMap<GetAllBlogsResponseDTO, GetAllBlogsResponse>();
             CreateMap<SaveBlogResponseDTO, SaveBlogResponse>();
             CreateMap<GetBlogByIdResponseDTO, GetBlogByIdResponse>();
+            CreateMap<IdentityUserDTO, IdentityUserResponse>();            
             #endregion
 
             #region Database Models to DTOs
-            CreateMap<ApplicationUser, IdentityUserDTO>().ReverseMap();
-
             CreateMap<BlogUser, BlogUserDTO>().ReverseMap();
-
             CreateMap<Post, PostDTO>().ReverseMap();
             CreateMap<Draft, DraftDTO>().ReverseMap();
             #endregion
             
+            CreateMap<ApplicationUser, IdentityUserResponse>().ReverseMap();
+
         }
     }
 }
