@@ -30,18 +30,12 @@ namespace PersonalBlog.Core.AuthContext
 
         public async Task<(ApplicationUser, string)> AuthenticateUser(AuthenticateIdentityDTO user)
         {
-            try
-            {
-                var (authenticatedUser, isSuccess) = await _userIdentityService.ValidateUserCredentialsAsync(user.UserName, user.Password);
-                if (!isSuccess) throw new FailedAuthenticationException("Invalid user credentials.");
+            var (authenticatedUser, isSuccess) = await _userIdentityService.ValidateUserCredentialsAsync(user.UserName, user.Password);
+            if (!isSuccess) //throw new FailedAuthenticationException("Invalid user credentials.");
+                return (null, null);
 
-                var accessToken = _tokenService.GenerateAccessToken(authenticatedUser);
-                return (authenticatedUser, accessToken);
-            }
-            catch (Exception e)
-            {
-                throw;
-            }
+            var accessToken = _tokenService.GenerateAccessToken(authenticatedUser);
+            return (authenticatedUser, accessToken);            
         }
 
         public async Task<BlogUserDTO?> GetUserByIdAsync(Guid userId)

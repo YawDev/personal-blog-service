@@ -4,6 +4,8 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using PersonalBlog.Api.ActionFilters;
 using PersonalBlog.Api.Contracts.Request;
+using PersonalBlog.Api.Contracts.Response.Auth;
+using PersonalBlog.Api.Contracts.Response.Blogs;
 using PersonalBlog.Core.Dtos;
 using PersonalBlog.Core.Interfaces;
 using PersonalBlog.Models.DatabaseModels;
@@ -26,8 +28,24 @@ namespace PersonalBlog.Api.Controllers
         {
             var identityDTO = _mapper.Map<AuthenticateIdentityDTO>(request);
             var (user, token) = await _authenticationService.AuthenticateUser(identityDTO);
+            if (user == null)
+            {
+                return Unauthorized("Failed to authenticate credentials.");
+            }
+            
+            Response.Cookies.Append("access_token", token, new CookieOptions
+            {
+                HttpOnly = true,
+                Secure = true,
+                SameSite = SameSiteMode.None,
+                Expires = DateTimeOffset.UtcNow.AddMinutes(30)
+            });
+            
             await _signInManager.SignInAsync(user, isPersistent: false);
-            return Ok(new { User = _mapper.Map<IdentityUserDTO>(user), Token = token });
+            return Ok(new LoginResponse()
+            {
+                User = _mapper.Map<IdentityUserResponse>(user)
+            });
         }
 
         [AllowAnonymous]
