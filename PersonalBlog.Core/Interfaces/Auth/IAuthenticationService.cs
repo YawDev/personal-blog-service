@@ -9,5 +9,6 @@ namespace PersonalBlog.Core.Interfaces
         Task<ApplicationUser> CreateUserAndIdentity(CreateIdentityDTO user);
         Task<(ApplicationUser, string)> AuthenticateUser(AuthenticateIdentityDTO user);
         Task<BlogUserDTO?> GetUserByIdAsync(Guid userId);
+        Task<IdentityUserDTO?> GetIdentityUserAsync(Guid identityUserId);
     }
 }

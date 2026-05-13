@@ -38,7 +38,8 @@ namespace PersonalBlog.Api.Mapping
             #endregion
             
             CreateMap<ApplicationUser, IdentityUserResponse>().ReverseMap();
-
+            CreateMap<ApplicationUser, IdentityUserDTO>().ReverseMap();
+            CreateMap<IdentityUserDTO, IdentityUserResponse>().ReverseMap();
         }
     }
 }

@@ -43,5 +43,11 @@ namespace PersonalBlog.Core.AuthContext
             var user = await _userIdentityService.GetUserByIdAsync(userId);
             return user;
         }
+
+        public async Task<IdentityUserDTO?> GetIdentityUserAsync(Guid identityUserId)
+        {
+            var user = await _userIdentityService.GetIdentityUserInfo(identityUserId);
+            return user;
+        }
     }
 }
