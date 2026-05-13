@@ -10,6 +10,7 @@ using PersonalBlog.Core.Dtos;
 using PersonalBlog.Core.Interfaces;
 using PersonalBlog.Models.DatabaseModels;
 using PersonalBlog.Models.Dtos;
+using System.Security.Claims;
 
 namespace PersonalBlog.Api.Controllers
 {
@@ -44,7 +45,7 @@ namespace PersonalBlog.Api.Controllers
             await _signInManager.SignInAsync(user, isPersistent: false);
             return Ok(new LoginResponse()
             {
-                User = _mapper.Map<IdentityUserResponse>(user)
+                    User = _mapper.Map<IdentityUserResponse>(user)
             });
         }
 
@@ -92,6 +93,29 @@ namespace PersonalBlog.Api.Controllers
             // Retrieve the pre-validated user from HttpContext
             var identityUser = HttpContext.Items["AuthenticatedIdentity"] as IdentityUserDTO;
             return Ok(identityUser);
+        }
+
+        /// <summary>
+        /// Retrieves identity information for the authenticated user.
+        /// </summary>
+        /// <returns>Identity information for the authenticated user</returns>
+        [Authorize]
+        [HttpGet("auth/me")]
+        public async Task<IActionResult> GetCurrentUser()
+        {
+            // Retrieve the pre-validated user from HttpContext
+            var userId = HttpContext.User.Claims
+            .Where(c => c.Type == ClaimTypes.NameIdentifier || c.Type == "sub")
+            .Select(c => c.Value)
+            .FirstOrDefault(v => Guid.TryParse(v, out _));
+
+            if (userId == null) return Unauthorized();
+
+            var user = await _authenticationService.GetIdentityUserAsync(Guid.Parse(userId));
+            return Ok(new CheckIdentityResponse()
+            {
+                User = _mapper.Map<IdentityUserResponse>(user)
+            });        
         }
     }
 }
