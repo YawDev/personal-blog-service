@@ -45,10 +45,36 @@ namespace PersonalBlog.Api.Controllers
             var createBlogDTO = _mapper.Map<CreateBlogDTO>(createBlogRequest);
 
             var createdBlog = await _blogService.CreatePostAsync(createBlogDTO, id);
-            
+
             var response = _mapper.Map<SaveBlogResponse>(createdBlog);
 
-            return Ok(response);            
+            return Ok(response);
+        }
+
+        [IdentityFilter]
+        [HttpPut("/blogs/{postId}/users/{id}")]
+        public async Task<IActionResult> UpdateBlog(Guid id, Guid postId, [FromBody] UpdateBlogRequest updateBlogRequest)
+        {
+            updateBlogRequest.Id = postId;
+            var postDto = _mapper.Map<PostDTO>(updateBlogRequest);
+            var result = await _blogService.UpdatePostAsync(postDto, id);
+
+            if (!result.IsSaved)
+                return NotFound();
+
+            return Ok(_mapper.Map<SaveBlogResponse>(result));
+        }
+
+        [IdentityFilter]
+        [HttpDelete("/blogs/{postId}/users/{id}")]
+        public async Task<IActionResult> DeleteBlog(Guid id, Guid postId)
+        {
+            var result = await _blogService.DeletePostAsync(postId, id);
+
+            if (!result.IsDeleted)
+                return NotFound();
+
+            return Ok(_mapper.Map<DeleteBlogResponse>(result));
         }
     }
 }

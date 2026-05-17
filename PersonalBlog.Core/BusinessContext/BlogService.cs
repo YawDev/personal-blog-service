@@ -55,9 +55,20 @@ namespace PersonalBlog.Core.BusinessContext
             throw new NotImplementedException();
         }
 
-        public Task<DeleteBlogResponseDTO> DeletePostAsync(Guid postId)
+        public async Task<DeleteBlogResponseDTO> DeletePostAsync(Guid postId, Guid userId)
         {
-            throw new NotImplementedException();
+            var existing = await _blogRepository.GetByIdAsync(postId);
+            if (existing == null)
+                return new DeleteBlogResponseDTO { IsDeleted = false, PostGuid = postId };
+
+            var requestingUser = await _userRepository.GetByIdAsync(userId);
+            bool isAdmin = requestingUser?.Role == Models.Enums.UserRole.Admin;
+
+            if (existing.Userid != userId && !isAdmin)
+                throw new Exceptions.UnauthorizedException("You are not authorized to delete this post.");
+
+            var deleted = await _blogRepository.DeleteAsync(postId);
+            return new DeleteBlogResponseDTO { IsDeleted = deleted, PostGuid = postId };
         }
 
         public Task<GetAllDraftsByUserResponseDTO> GetAllDraftsByUserAsync(Guid userId)
@@ -117,9 +128,34 @@ namespace PersonalBlog.Core.BusinessContext
             throw new NotImplementedException();
         }
 
-        public Task<SaveBlogResponseDTO> UpdatePostAsync(PostDTO postDto)
+        public async Task<SaveBlogResponseDTO> UpdatePostAsync(PostDTO postDto, Guid userId)
         {
-            throw new NotImplementedException();
+            if (string.IsNullOrWhiteSpace(postDto.Title) ||
+                string.IsNullOrWhiteSpace(postDto.Content) ||
+                string.IsNullOrWhiteSpace(postDto.Preview))
+                throw new Exceptions.BadRequestException("Title, content, and preview are required.");
+
+            var existing = await _blogRepository.GetByIdAsync(postDto.Id);
+            if (existing == null)
+                return new SaveBlogResponseDTO { IsSaved = false, PostGuid = postDto.Id };
+
+            if (existing.Userid != userId)
+                throw new Exceptions.UnauthorizedException("You are not authorized to edit this post.");
+
+            var updatedPost = new Post
+            {
+                Id = existing.Id,
+                Userid = existing.Userid,
+                Title = postDto.Title,
+                Content = postDto.Content,
+                Preview = postDto.Preview,
+                Dateposted = existing.Dateposted,
+                Createddate = existing.Createddate,
+                Lastmodifieddate = DateTime.UtcNow
+            };
+
+            var result = await _blogRepository.UpdateAsync(updatedPost);
+            return new SaveBlogResponseDTO { IsSaved = result > 0, PostGuid = existing.Id };
         }
     }
 }

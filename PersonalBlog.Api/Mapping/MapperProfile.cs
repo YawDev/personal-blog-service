@@ -21,6 +21,12 @@ namespace PersonalBlog.Api.Mapping
                .ForMember(dest => dest.UserName, opt => opt.MapFrom(src => src.UserName.Trim()));
 
             CreateMap<CreateBlogRequest, CreateBlogDTO>();
+            CreateMap<UpdateBlogRequest, PostDTO>()
+                .ForMember(dest => dest.Userid, opt => opt.Ignore())
+                .ForMember(dest => dest.Dateposted, opt => opt.Ignore())
+                .ForMember(dest => dest.Createddate, opt => opt.Ignore())
+                .ForMember(dest => dest.Lastmodifieddate, opt => opt.Ignore())
+                .ForMember(dest => dest.User, opt => opt.Ignore());
             #endregion
 
             #region DTOs to Response Models
@@ -28,7 +34,8 @@ namespace PersonalBlog.Api.Mapping
             CreateMap<GetAllBlogsResponseDTO, GetAllBlogsResponse>();
             CreateMap<SaveBlogResponseDTO, SaveBlogResponse>();
             CreateMap<GetBlogByIdResponseDTO, GetBlogByIdResponse>();
-            CreateMap<IdentityUserDTO, IdentityUserResponse>();            
+            CreateMap<IdentityUserDTO, IdentityUserResponse>();
+            CreateMap<DeleteBlogResponseDTO, DeleteBlogResponse>();
             #endregion
 
             #region Database Models to DTOs
