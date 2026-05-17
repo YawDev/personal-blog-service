@@ -38,7 +38,7 @@ namespace PersonalBlog.Api.Controllers
             return Ok(response);
         }
 
-        [IdentityFilter]
+        [Authorize]
         [HttpPost("/blogs/create/{id}")]
         public async Task<IActionResult> CreateBlog(Guid id, [FromBody] CreateBlogRequest createBlogRequest)
         {
@@ -51,7 +51,7 @@ namespace PersonalBlog.Api.Controllers
             return Ok(response);
         }
 
-        [IdentityFilter]
+        [Authorize]
         [HttpPut("/blogs/{postId}/users/{id}")]
         public async Task<IActionResult> UpdateBlog(Guid id, Guid postId, [FromBody] UpdateBlogRequest updateBlogRequest)
         {
@@ -65,7 +65,7 @@ namespace PersonalBlog.Api.Controllers
             return Ok(_mapper.Map<SaveBlogResponse>(result));
         }
 
-        [IdentityFilter]
+        [Authorize]
         [HttpDelete("/blogs/{postId}/users/{id}")]
         public async Task<IActionResult> DeleteBlog(Guid id, Guid postId)
         {
