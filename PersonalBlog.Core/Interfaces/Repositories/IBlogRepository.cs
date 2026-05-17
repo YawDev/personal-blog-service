@@ -10,6 +10,6 @@ namespace PersonalBlog.Core.Interfaces.Repositories
         Task<bool> ExistsAsync(Guid postId);
         Task<PostDTO?> GetByIdAsync(Guid postId);
         Task<List<PostDTO>> GetAllAsync();
-        Task<int> UpdateAsync(Post post);
+        Task<int> UpdateAsync(Guid postId, PostDTO post);
     }
 }

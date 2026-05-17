@@ -55,9 +55,17 @@ namespace PersonalBlog.Core.BusinessContext
             throw new NotImplementedException();
         }
 
-        public Task<DeleteBlogResponseDTO> DeletePostAsync(Guid postId)
+        public async Task<DeleteBlogResponseDTO> DeletePostAsync(Guid postId, Guid userId)
         {
-            throw new NotImplementedException();
+            var existing = await _blogRepository.GetByIdAsync(postId);
+            if (existing == null)
+                return new DeleteBlogResponseDTO { IsDeleted = false, PostGuid = postId };
+
+            if (existing.Userid != userId)
+                throw new Exceptions.UnauthorizedException("You are not authorized to delete this post.");
+
+            var deleted = await _blogRepository.DeleteAsync(postId);
+            return new DeleteBlogResponseDTO { IsDeleted = deleted, PostGuid = postId };
         }
 
         public Task<GetAllDraftsByUserResponseDTO> GetAllDraftsByUserAsync(Guid userId)
@@ -117,9 +125,28 @@ namespace PersonalBlog.Core.BusinessContext
             throw new NotImplementedException();
         }
 
-        public Task<SaveBlogResponseDTO> UpdatePostAsync(PostDTO postDto)
+        public async Task<SaveBlogResponseDTO> UpdatePostAsync(PostDTO postDto, Guid userId)
         {
-            throw new NotImplementedException();
+            if (string.IsNullOrWhiteSpace(postDto.Title) ||
+                string.IsNullOrWhiteSpace(postDto.Content) ||
+                string.IsNullOrWhiteSpace(postDto.Preview))
+                throw new Exceptions.BadRequestException("Title, content, and preview are required.");
+
+            var existing = await _blogRepository.GetByIdAsync(postDto.Id);
+            if (existing == null)
+                return new SaveBlogResponseDTO { IsSaved = false, PostGuid = postDto.Id };
+
+            if (existing.Userid != userId)
+                throw new Exceptions.UnauthorizedException("You are not authorized to edit this post.");
+
+            existing.Title = postDto.Title;
+            existing.Content = postDto.Content;
+            existing.Preview = postDto.Preview;
+            existing.Lastmodifieddate = DateTime.UtcNow;
+
+            var result = await _blogRepository.UpdateAsync(existing.Id, existing);
+            
+            return new SaveBlogResponseDTO { IsSaved = result > 0, PostGuid = existing.Id };
         }
     }
 }
