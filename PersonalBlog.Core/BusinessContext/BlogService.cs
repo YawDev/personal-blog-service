@@ -61,10 +61,7 @@ namespace PersonalBlog.Core.BusinessContext
             if (existing == null)
                 return new DeleteBlogResponseDTO { IsDeleted = false, PostGuid = postId };
 
-            var requestingUser = await _userRepository.GetByIdAsync(userId);
-            bool isAdmin = requestingUser?.Role == Models.Enums.UserRole.Admin;
-
-            if (existing.Userid != userId && !isAdmin)
+            if (existing.Userid != userId)
                 throw new Exceptions.UnauthorizedException("You are not authorized to delete this post.");
 
             var deleted = await _blogRepository.DeleteAsync(postId);
@@ -142,19 +139,13 @@ namespace PersonalBlog.Core.BusinessContext
             if (existing.Userid != userId)
                 throw new Exceptions.UnauthorizedException("You are not authorized to edit this post.");
 
-            var updatedPost = new Post
-            {
-                Id = existing.Id,
-                Userid = existing.Userid,
-                Title = postDto.Title,
-                Content = postDto.Content,
-                Preview = postDto.Preview,
-                Dateposted = existing.Dateposted,
-                Createddate = existing.Createddate,
-                Lastmodifieddate = DateTime.UtcNow
-            };
+            existing.Title = postDto.Title;
+            existing.Content = postDto.Content;
+            existing.Preview = postDto.Preview;
+            existing.Lastmodifieddate = DateTime.UtcNow;
 
-            var result = await _blogRepository.UpdateAsync(updatedPost);
+            var result = await _blogRepository.UpdateAsync(existing.Id, existing);
+            
             return new SaveBlogResponseDTO { IsSaved = result > 0, PostGuid = existing.Id };
         }
     }
