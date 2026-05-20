@@ -61,7 +61,7 @@ namespace PersonalBlog.Core.BusinessContext
             if (existing == null)
                 return new DeleteBlogResponseDTO { IsDeleted = false, PostGuid = postId };
 
-            if (existing.Userid != userId)
+            if (existing.User.IdentityUserId != userId)
                 throw new Exceptions.UnauthorizedException("You are not authorized to delete this post.");
 
             var deleted = await _blogRepository.DeleteAsync(postId);
@@ -86,7 +86,7 @@ namespace PersonalBlog.Core.BusinessContext
                     Content = blog.Content,
                     Preview = blog.Preview,
                     DatePosted = blog.Dateposted,
-                    UserId = blog.Userid,
+                    UserId = blog.User.IdentityUserId,
                 }).ToList()
             };
         }
@@ -114,7 +114,7 @@ namespace PersonalBlog.Core.BusinessContext
                     Content = post.Content,
                     Preview = post.Preview,
                     DatePosted = post.Dateposted,
-                    UserId = post.Userid
+                    UserId = post.User.IdentityUserId
                 }
             };
             
@@ -136,7 +136,7 @@ namespace PersonalBlog.Core.BusinessContext
             if (existing == null)
                 return new SaveBlogResponseDTO { IsSaved = false, PostGuid = postDto.Id };
 
-            if (existing.Userid != userId)
+            if (existing.User.IdentityUserId != userId)
                 throw new Exceptions.UnauthorizedException("You are not authorized to edit this post.");
 
             existing.Title = postDto.Title;
