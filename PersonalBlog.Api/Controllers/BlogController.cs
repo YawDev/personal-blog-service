@@ -66,7 +66,7 @@ namespace PersonalBlog.Api.Controllers
         }
 
         [Authorize]
-        [HttpDelete("/blogs/{postId}/users/{id}")]
+        [HttpDelete("/blogs/{postId}/users/{id}/delete")]
         public async Task<IActionResult> DeleteBlog(Guid id, Guid postId)
         {
             var result = await _blogService.DeletePostAsync(postId, id);
