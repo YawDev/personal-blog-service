@@ -1,4 +1,4 @@
-namespace PersonalBlog.Models.Dtos
+namespace PersonalBlog.Core.Dtos.RequestDtos
 {
     public class CreateBlogDTO
     {

@@ -1,7 +1,7 @@
 using PersonalBlog.Core.Dtos;
+using PersonalBlog.Core.Dtos.RequestDtos;
 using PersonalBlog.Core.Interfaces;
 using PersonalBlog.Models.DatabaseModels;
-using PersonalBlog.Models.Dtos;
 
 namespace PersonalBlog.Core.AuthContext
 {

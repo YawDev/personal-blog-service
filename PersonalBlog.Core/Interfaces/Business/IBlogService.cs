@@ -1,4 +1,5 @@
 using PersonalBlog.Core.Dtos;
+using PersonalBlog.Core.Dtos.RequestDtos;
 using PersonalBlog.Core.Dtos.ResponseDtos;
 using PersonalBlog.Models.Dtos;
 
@@ -11,10 +12,12 @@ namespace PersonalBlog.Core.Interfaces.Business
         public Task<GetBlogByIdResponseDTO?> GetPostByIdAsync(Guid postId);
         public Task<GetAllBlogsResponseDTO> GetAllPostsAsync();
         public Task<SaveBlogResponseDTO> UpdatePostAsync(PostDTO postDto, Guid userId);
-        public Task<DeleteBlogResponseDTO> DeleteDraftAsync(Guid draftId);
+        public Task<DeleteDraftResponseDTO> DeleteDraftAsync(Guid draftId, Guid userId);
         public Task<GetAllDraftsByUserResponseDTO> GetAllDraftsByUserAsync(Guid userId);
-        public Task<GetDraftByIdResponseDTO> GetDraftByIdAsync(Guid draftId);
+        public Task<GetDraftByIdResponseDTO> GetDraftByIdAsync(Guid draftId, Guid userId);
         public Task<SaveDraftResponseDTO> CreateDraftAsync(DraftDTO draftDto);
-        public Task<SaveDraftResponseDTO> UpdateDraftAsync(DraftDTO draftDto);
+        public Task<SaveDraftResponseDTO> UpdateDraftAsync(Guid userId, Guid draftId, SaveDraftDTO draftDto);
+        public Task<SaveBlogResponseDTO> PublishPostAsync(PostDTO postDto, Guid userId, Guid draftId);
+
     }
 }

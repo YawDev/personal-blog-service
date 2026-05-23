@@ -52,6 +52,30 @@ namespace PersonalBlog.Infrastructure.Repositories
             return post;
         }
 
+        public async Task<bool> PublishBlogPost(Guid draftId, Guid userId, PostDTO post)
+        {
+            var draft = await _context.Drafts.FirstOrDefaultAsync(d => d.Id == draftId);
+            if (draft == null) return false;
+
+            if (draft.User.IdentityUserId != userId)
+                throw new UnauthorizedAccessException("You do not have permission to publish this draft.");
+
+            var newPost = new Post
+            {
+                Id = Guid.NewGuid(),
+                Userid = userId,
+                Title = post.Title,
+                Content = post.Content,
+                Preview = post.Preview,
+                Createddate = DateTime.UtcNow,
+                Lastmodifieddate = DateTime.UtcNow
+            };
+
+            _context.Posts.Add(newPost);
+            _context.Drafts.Remove(draft);
+            return await _context.SaveChangesAsync() > 0;
+        }
+
         public async Task<int> UpdateAsync(Guid postId, PostDTO post)
         {
             var existingPost = await _context.Posts.FindAsync(postId);

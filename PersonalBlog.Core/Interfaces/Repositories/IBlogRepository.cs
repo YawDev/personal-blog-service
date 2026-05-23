@@ -11,5 +11,7 @@ namespace PersonalBlog.Core.Interfaces.Repositories
         Task<PostDTO?> GetByIdAsync(Guid postId);
         Task<List<PostDTO>> GetAllAsync();
         Task<int> UpdateAsync(Guid postId, PostDTO post);
+        Task<bool> PublishBlogPost(Guid draftId, Guid userId, PostDTO post);
+
     }
 }

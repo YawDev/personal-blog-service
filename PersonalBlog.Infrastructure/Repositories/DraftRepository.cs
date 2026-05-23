@@ -2,8 +2,11 @@ using AutoMapper;
 using AutoMapper.QueryableExtensions;
 using Microsoft.EntityFrameworkCore;
 using PersonalBlog.Core.Dtos;
+using PersonalBlog.Core.Dtos.RequestDtos;
+using PersonalBlog.Core.Exceptions;
 using PersonalBlog.Core.Interfaces.Repositories;
 using PersonalBlog.Models.DatabaseModels;
+using System;
 
 namespace PersonalBlog.Infrastructure.Repositories
 {
@@ -53,16 +56,30 @@ namespace PersonalBlog.Infrastructure.Repositories
         public Task<List<DraftDTO>> GetByUserIdAsync(Guid userId)
         {
             var drafts = _context.Drafts
-                .Where(d => d.Userid == userId)
+                .Where(d => d.User.IdentityUserId == userId)
                 .Include(d => d.User)
                 .ProjectTo<DraftDTO>(_mapper.ConfigurationProvider)
                 .ToListAsync();
             return drafts;
         }
 
-        public async Task<int> UpdateAsync(Draft draft)
+        public async Task<int> UpdateAsync(Guid draftId, Guid userId, SaveDraftDTO draftDto)
         {
-            _context.Drafts.Update(draft);
+            var existing = await _context.Drafts
+                .Include(d => d.User)
+                .FirstOrDefaultAsync(d => d.Id == draftId);
+
+            if (existing.User.IdentityUserId != userId)
+            {
+                throw new UnauthorizedException("You are not authorized to update this draft.");
+            }
+
+            existing.Title = draftDto.Title;
+            existing.Content = draftDto.Content;
+            existing.Preview = draftDto.Preview;
+            existing.Lastmodifieddate = DateTime.UtcNow;
+
+            _context.Drafts.Update(existing);
             return await _context.SaveChangesAsync();
         }
     }

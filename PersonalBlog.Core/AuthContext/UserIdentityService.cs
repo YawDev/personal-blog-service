@@ -1,10 +1,10 @@
 using Microsoft.AspNetCore.Identity;
 using PersonalBlog.Core.Dtos;
+using PersonalBlog.Core.Dtos.RequestDtos;
 using PersonalBlog.Core.Exceptions;
 using PersonalBlog.Core.Interfaces;
 using PersonalBlog.Core.Interfaces.Repositories;
 using PersonalBlog.Models.DatabaseModels;
-using PersonalBlog.Models.Dtos;
 
 namespace PersonalBlog.Core.AuthContext
 {

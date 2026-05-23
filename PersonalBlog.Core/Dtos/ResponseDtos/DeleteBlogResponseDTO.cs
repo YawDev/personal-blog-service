@@ -4,4 +4,5 @@ namespace PersonalBlog.Core.Dtos.ResponseDtos
     {
         public Guid PostGuid { get; set; }
     }
+
 }

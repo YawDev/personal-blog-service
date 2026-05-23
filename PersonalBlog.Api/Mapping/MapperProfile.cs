@@ -2,6 +2,7 @@ using AutoMapper;
 using PersonalBlog.Api.Contracts.Request;
 using PersonalBlog.Api.Contracts.Response.Blogs;
 using PersonalBlog.Core.Dtos;
+using PersonalBlog.Core.Dtos.RequestDtos;
 using PersonalBlog.Core.Dtos.ResponseDtos;
 using PersonalBlog.Models.DatabaseModels;
 using PersonalBlog.Models.Dtos;
@@ -21,6 +22,7 @@ namespace PersonalBlog.Api.Mapping
                .ForMember(dest => dest.UserName, opt => opt.MapFrom(src => src.UserName.Trim()));
 
             CreateMap<CreateBlogRequest, CreateBlogDTO>();
+            CreateMap<SaveDraftRequest, SaveDraftDTO>();
             CreateMap<UpdateBlogRequest, PostDTO>()
                 .ForMember(dest => dest.Userid, opt => opt.Ignore())
                 .ForMember(dest => dest.Dateposted, opt => opt.Ignore())
