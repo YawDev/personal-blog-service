@@ -1,5 +1,4 @@
 using PersonalBlog.Core.Dtos;
-using PersonalBlog.Core.Exceptions;
 using PersonalBlog.Core.Interfaces;
 using PersonalBlog.Models.DatabaseModels;
 using PersonalBlog.Models.Dtos;

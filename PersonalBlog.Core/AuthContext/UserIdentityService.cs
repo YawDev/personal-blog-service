@@ -69,6 +69,17 @@ namespace PersonalBlog.Core.AuthContext
         {
             return await _userRepository.GetByUserNameAsync(userName);
         }
+
+        public async Task<bool> UpdateUserAsync(Guid userId, EditAccountDTO editAccountRequest)
+        {
+            // Update the user's account details in the identity system
+            var updateIdentityResult = await _userRepository.UpdateBlogUserAsync(userId, editAccountRequest);
+
+            // Update FK BlogUser table with same changes to avoid data inconsistency   
+            var updateBlogUserResult = await _userRepository.UpdateIdentityUserAsync(userId, editAccountRequest);
+
+            return updateIdentityResult && updateBlogUserResult;
+        }       
         
         public async Task<(ApplicationUser?,bool)> ValidateUserCredentialsAsync(string userName, string password)
         {

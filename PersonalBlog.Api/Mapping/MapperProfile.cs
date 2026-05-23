@@ -27,6 +27,8 @@ namespace PersonalBlog.Api.Mapping
                 .ForMember(dest => dest.Createddate, opt => opt.Ignore())
                 .ForMember(dest => dest.Lastmodifieddate, opt => opt.Ignore())
                 .ForMember(dest => dest.User, opt => opt.Ignore());
+  
+            CreateMap<EditAccountRequest, EditAccountDTO>();
             #endregion
 
             #region DTOs to Response Models
