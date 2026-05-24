@@ -99,18 +99,19 @@ namespace PersonalBlog.Core.BusinessContext
             var drafts = await _draftRepository.GetByUserIdAsync(userId);
             if(drafts == null || drafts.Count == 0)
             {
-                return new GetAllDraftsByUserResponseDTO { UnfinishedDrafts = new List<DraftDTO>() };
+                return new GetAllDraftsByUserResponseDTO { UnfinishedDrafts = new List<DraftResponseDTO>() };
             }
 
             return new GetAllDraftsByUserResponseDTO
             {
-                UnfinishedDrafts = drafts.Select(draft => new DraftDTO
+                UnfinishedDrafts = drafts.Select(draft => new DraftResponseDTO
                 {
                     Id = draft.Id,
                     Title = draft.Title,
                     Content = draft.Content,
                     Preview = draft.Preview,
-                    Createdon = draft.Createdon
+                    CreatedOn = draft.Createdon,
+                    UserId = draft.Userid
                 }).ToList()
             };
         }
@@ -149,13 +150,14 @@ namespace PersonalBlog.Core.BusinessContext
 
               return new GetDraftByIdResponseDTO
               {
-                Draft = new DraftDTO
+                Draft = new DraftResponseDTO
                 {
                      Id = draft.Id,
                      Title = draft.Title,
                      Content = draft.Content,
                      Preview = draft.Preview,
-                     Createdon = draft.Createdon
+                     CreatedOn = draft.Createdon,
+                     UserId = draft.Userid
                 }
               };
 

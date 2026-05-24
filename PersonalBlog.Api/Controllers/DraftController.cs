@@ -16,7 +16,7 @@ namespace PersonalBlog.Api.Controllers
         private readonly IMapper _mapper = mapper;
 
         [Authorize]
-        [HttpPut("/drafts/{draftId}/users/{id}")]
+        [HttpPut("/drafts/{draftId}/users/{id}/edit")]
         public async Task<IActionResult> UpdateDraft(Guid id, Guid draftId, [FromBody] SaveDraftRequest updateDraftRequest)
         {
             var draftDto = _mapper.Map<SaveDraftDTO>(updateDraftRequest);
@@ -32,7 +32,15 @@ namespace PersonalBlog.Api.Controllers
         [HttpGet("/drafts/users/{id}")]
         public async Task<IActionResult> GetDraftsForUser(Guid id)
         {
-            var result = await _blogService.GetAllDraftsByUserAsync(id);         
+            var result = await _blogService.GetAllDraftsByUserAsync(id);
+            return Ok(result);
+        }
+
+        [Authorize]
+        [HttpGet("/drafts/{draftId}/users/{id}")]
+        public async Task<IActionResult> GetDraftById(Guid id, Guid draftId)
+        {
+            var result = await _blogService.GetDraftByIdAsync(draftId, id);
             return Ok(result);
         }
 
@@ -49,7 +57,7 @@ namespace PersonalBlog.Api.Controllers
         }
 
         [Authorize]
-        [HttpDelete("/drafts/{draftId}/users/{id}/publish")]
+        [HttpPost("/drafts/{draftId}/users/{id}/publish")]
         public async Task<IActionResult> PublishDraft(Guid id, Guid draftId, [FromBody] CreateBlogRequest publishBlogRequest)
         {
             var result = await _blogService.PublishPostAsync(new PostDTO { Title = publishBlogRequest.Title, Content = publishBlogRequest.Content }, id, draftId);
