@@ -1,6 +1,6 @@
 using PersonalBlog.Core.Dtos;
+using PersonalBlog.Core.Dtos.RequestDtos;
 using PersonalBlog.Models.DatabaseModels;
-using PersonalBlog.Models.Dtos;
 
 namespace PersonalBlog.Core.Interfaces.Repositories
 {

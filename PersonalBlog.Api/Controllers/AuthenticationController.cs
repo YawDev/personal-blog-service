@@ -7,9 +7,9 @@ using PersonalBlog.Api.Contracts.Request;
 using PersonalBlog.Api.Contracts.Response.Auth;
 using PersonalBlog.Api.Contracts.Response.Blogs;
 using PersonalBlog.Core.Dtos;
+using PersonalBlog.Core.Dtos.RequestDtos;
 using PersonalBlog.Core.Interfaces;
 using PersonalBlog.Models.DatabaseModels;
-using PersonalBlog.Models.Dtos;
 using System.Security.Claims;
 
 namespace PersonalBlog.Api.Controllers

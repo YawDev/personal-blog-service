@@ -24,6 +24,9 @@ public partial class PersonalBlogDbContext : IdentityDbContext<ApplicationUser, 
     public virtual DbSet<Post> Posts { get; set; }
     public virtual DbSet<ApplicationUser> ApplicationUsers { get; set; }
 
+    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+        => optionsBuilder.UseNpgsql("Host=localhost;Port=5432;Database=postgres;Username=postgres;Password=p1");
+
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

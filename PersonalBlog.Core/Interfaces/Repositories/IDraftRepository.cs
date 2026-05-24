@@ -1,4 +1,5 @@
 using PersonalBlog.Core.Dtos;
+using PersonalBlog.Core.Dtos.RequestDtos;
 using PersonalBlog.Models.DatabaseModels;
 
 namespace PersonalBlog.Core.Interfaces.Repositories
@@ -10,6 +11,6 @@ namespace PersonalBlog.Core.Interfaces.Repositories
         Task<bool> ExistsAsync(Guid draftId);
         Task<DraftDTO?> GetByIdAsync(Guid draftId);
         Task<List<DraftDTO>> GetByUserIdAsync(Guid userId);
-        Task<int> UpdateAsync(Draft draft);
+        Task<int> UpdateAsync(Guid draftId, Guid userId, SaveDraftDTO draftDto);
     }
 }

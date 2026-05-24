@@ -2,9 +2,9 @@ using AutoMapper;
 using AutoMapper.QueryableExtensions;
 using Microsoft.EntityFrameworkCore;
 using PersonalBlog.Core.Dtos;
+using PersonalBlog.Core.Dtos.RequestDtos;
 using PersonalBlog.Core.Interfaces.Repositories;
 using PersonalBlog.Models.DatabaseModels;
-using PersonalBlog.Models.Dtos;
 
 namespace PersonalBlog.Infrastructure.Repositories
 {  
