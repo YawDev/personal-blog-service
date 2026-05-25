@@ -15,10 +15,11 @@ namespace PersonalBlog.Infrastructure.Repositories
         private readonly PersonalBlogDbContext _context = context;
         private readonly IMapper _mapper = mapper;
 
-        public async Task<int> CreateAsync(Draft draft)
+        public async Task<(Guid draftId, int result)> CreateAsync(Draft draft)
         {
             _context.Drafts.Add(draft);
-            return await _context.SaveChangesAsync();
+            var result = await _context.SaveChangesAsync();
+            return (draft.Id, result);
         }
 
         public async Task<bool> DeleteAsync(Guid draftId)

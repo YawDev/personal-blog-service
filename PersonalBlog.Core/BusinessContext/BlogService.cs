@@ -21,23 +21,29 @@ namespace PersonalBlog.Core.BusinessContext
             _userRepository = userRepository;
         }
 
-        public async Task<SaveDraftResponseDTO> CreateDraftAsync(DraftDTO draftDto)
+        public async Task<SaveDraftResponseDTO> CreateDraftAsync(Guid userId, SaveDraftDTO draftDto)
         {
-           var result = await _draftRepository.CreateAsync(new Draft
+            var user = await _userRepository.GetByIdAsync(userId);
+            if (user == null)           
+            {
+                throw new Exception("User not found");
+            }
+
+           var (draftId, result) = await _draftRepository.CreateAsync(new Draft
            {
                Id = Guid.NewGuid(),
-               Userid = draftDto.Userid,
+               Userid = user.Id,
                Title = draftDto.Title,
                Content = draftDto.Content,
                Preview = draftDto.Preview,
                Createdon = DateTime.UtcNow,
-               Lastmodifieddate = DateTime.UtcNow
+               Lastmodifieddate = DateTime.UtcNow,
            });
 
            return new SaveDraftResponseDTO
            {
                IsSaved = result > 0,
-               DraftGuid = draftDto.Id
+               DraftGuid = draftId
            };
         }
 
@@ -143,7 +149,7 @@ namespace PersonalBlog.Core.BusinessContext
                throw new Exception("Draft not found");
            }
 
-           if(draft.Userid != userId)
+           if(draft.User.IdentityUserId != userId)
            {
                throw new Exceptions.UnauthorizedException("You are not authorized to view this draft.");
            }
@@ -157,7 +163,7 @@ namespace PersonalBlog.Core.BusinessContext
                      Content = draft.Content,
                      Preview = draft.Preview,
                      CreatedOn = draft.Createdon,
-                     UserId = draft.Userid
+                     UserId = draft.User.IdentityUserId
                 }
               };
 
