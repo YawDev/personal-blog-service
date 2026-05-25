@@ -1,4 +1,5 @@
 using PersonalBlog.Core.Dtos;
+using PersonalBlog.Core.Dtos.RequestDtos;
 using PersonalBlog.Core.Dtos.ResponseDtos;
 using PersonalBlog.Core.Interfaces.Business;
 using PersonalBlog.Core.Interfaces.Repositories;
@@ -10,17 +11,40 @@ namespace PersonalBlog.Core.BusinessContext
     public class BlogService : IBlogService
     {
         private readonly IBlogRepository _blogRepository;
+        private readonly IDraftRepository _draftRepository;
         private readonly IUserRepository _userRepository;
 
-        public BlogService(IBlogRepository blogRepository, IUserRepository userRepository)
+        public BlogService(IBlogRepository blogRepository, IDraftRepository draftRepository, IUserRepository userRepository)
         {
             _blogRepository = blogRepository;
+            _draftRepository = draftRepository;
             _userRepository = userRepository;
         }
 
-        public Task<SaveDraftResponseDTO> CreateDraftAsync(DraftDTO draftDto)
+        public async Task<SaveDraftResponseDTO> CreateDraftAsync(Guid userId, SaveDraftDTO draftDto)
         {
-            throw new NotImplementedException();
+            var user = await _userRepository.GetByIdAsync(userId);
+            if (user == null)           
+            {
+                throw new Exception("User not found");
+            }
+
+           var (draftId, result) = await _draftRepository.CreateAsync(new Draft
+           {
+               Id = Guid.NewGuid(),
+               Userid = user.Id,
+               Title = draftDto.Title,
+               Content = draftDto.Content,
+               Preview = draftDto.Preview,
+               Createdon = DateTime.UtcNow,
+               Lastmodifieddate = DateTime.UtcNow,
+           });
+
+           return new SaveDraftResponseDTO
+           {
+               IsSaved = result > 0,
+               DraftGuid = draftId
+           };
         }
 
         public async Task<SaveBlogResponseDTO> CreatePostAsync(CreateBlogDTO postDto, Guid userGuid)
@@ -50,19 +74,52 @@ namespace PersonalBlog.Core.BusinessContext
             };
         }
 
-        public Task<DeleteBlogResponseDTO> DeleteDraftAsync(Guid draftId)
+        public async Task<DeleteDraftResponseDTO> DeleteDraftAsync(Guid draftId, Guid userId)
         {
-            throw new NotImplementedException();
+            var existing = await _draftRepository.GetByIdAsync(draftId);
+            if (existing == null)
+                return new DeleteDraftResponseDTO { IsDeleted = false, DraftGuid = draftId };
+
+            if (existing.User.IdentityUserId != userId)
+                throw new Exceptions.UnauthorizedException("You are not authorized to delete this draft.");
+
+            var deleted = await _draftRepository.DeleteAsync(draftId);
+            return new DeleteDraftResponseDTO { IsDeleted = deleted, DraftGuid = draftId };
         }
 
-        public Task<DeleteBlogResponseDTO> DeletePostAsync(Guid postId)
+        public async Task<DeleteBlogResponseDTO> DeletePostAsync(Guid postId, Guid userId)
         {
-            throw new NotImplementedException();
+            var existing = await _blogRepository.GetByIdAsync(postId);
+            if (existing == null)
+                return new DeleteBlogResponseDTO { IsDeleted = false, PostGuid = postId };
+
+            if (existing.User.IdentityUserId != userId)
+                throw new Exceptions.UnauthorizedException("You are not authorized to delete this post.");
+
+            var deleted = await _blogRepository.DeleteAsync(postId);
+            return new DeleteBlogResponseDTO { IsDeleted = deleted, PostGuid = postId };
         }
 
-        public Task<GetAllDraftsByUserResponseDTO> GetAllDraftsByUserAsync(Guid userId)
+        public async Task<GetAllDraftsByUserResponseDTO> GetAllDraftsByUserAsync(Guid userId)
         {
-            throw new NotImplementedException();
+            var drafts = await _draftRepository.GetByUserIdAsync(userId);
+            if(drafts == null || drafts.Count == 0)
+            {
+                return new GetAllDraftsByUserResponseDTO { UnfinishedDrafts = new List<DraftResponseDTO>() };
+            }
+
+            return new GetAllDraftsByUserResponseDTO
+            {
+                UnfinishedDrafts = drafts.Select(draft => new DraftResponseDTO
+                {
+                    Id = draft.Id,
+                    Title = draft.Title,
+                    Content = draft.Content,
+                    Preview = draft.Preview,
+                    CreatedOn = draft.Createdon,
+                    UserId = draft.Userid
+                }).ToList()
+            };
         }
 
         public async Task<GetAllBlogsResponseDTO> GetAllPostsAsync()
@@ -78,14 +135,38 @@ namespace PersonalBlog.Core.BusinessContext
                     Content = blog.Content,
                     Preview = blog.Preview,
                     DatePosted = blog.Dateposted,
-                    UserId = blog.Userid,
+                    UserId = blog.User.IdentityUserId,
                 }).ToList()
             };
         }
 
-        public Task<GetDraftByIdResponseDTO> GetDraftByIdAsync(Guid draftId)
+        public async Task<GetDraftByIdResponseDTO> GetDraftByIdAsync(Guid draftId, Guid userId)
         {
-            throw new NotImplementedException();
+
+           var draft = await _draftRepository.GetByIdAsync(draftId);
+           if(draft == null)
+           {
+               throw new Exception("Draft not found");
+           }
+
+           if(draft.User.IdentityUserId != userId)
+           {
+               throw new Exceptions.UnauthorizedException("You are not authorized to view this draft.");
+           }
+
+              return new GetDraftByIdResponseDTO
+              {
+                Draft = new DraftResponseDTO
+                {
+                     Id = draft.Id,
+                     Title = draft.Title,
+                     Content = draft.Content,
+                     Preview = draft.Preview,
+                     CreatedOn = draft.Createdon,
+                     UserId = draft.User.IdentityUserId
+                }
+              };
+
         }
 
         public async Task<GetBlogByIdResponseDTO?> GetPostByIdAsync(Guid postId)
@@ -106,20 +187,45 @@ namespace PersonalBlog.Core.BusinessContext
                     Content = post.Content,
                     Preview = post.Preview,
                     DatePosted = post.Dateposted,
-                    UserId = post.Userid
+                    UserId = post.User.IdentityUserId
                 }
             };
             
         }
 
-        public Task<SaveDraftResponseDTO> UpdateDraftAsync(DraftDTO draftDto)
+        public async Task<SaveBlogResponseDTO> PublishPostAsync(PostDTO postDto, Guid userId, Guid draftId)
         {
-            throw new NotImplementedException();
+            var (result, newPostId) = await _blogRepository.PublishBlogPost(draftId, userId, postDto);
+            return new SaveBlogResponseDTO { IsSaved = result, PostGuid = newPostId ?? Guid.Empty };
         }
 
-        public Task<SaveBlogResponseDTO> UpdatePostAsync(PostDTO postDto)
+        public async Task<SaveDraftResponseDTO> UpdateDraftAsync(Guid userId, Guid draftId, SaveDraftDTO draftDto)
         {
-            throw new NotImplementedException();
+            var result = await _draftRepository.UpdateAsync(draftId, userId, draftDto);
+            return new SaveDraftResponseDTO { IsSaved = result > 0, DraftGuid = draftId };
+        }
+
+        public async Task<SaveBlogResponseDTO> UpdatePostAsync(PostDTO postDto, Guid userId)
+        {
+            if (string.IsNullOrWhiteSpace(postDto.Title) ||
+                string.IsNullOrWhiteSpace(postDto.Preview))
+                throw new Exceptions.BadRequestException("Title and preview are required.");
+
+            var existing = await _blogRepository.GetByIdAsync(postDto.Id);
+            if (existing == null)
+                return new SaveBlogResponseDTO { IsSaved = false, PostGuid = postDto.Id };
+
+            if (existing.User.IdentityUserId != userId)
+                throw new Exceptions.UnauthorizedException("You are not authorized to edit this post.");
+
+            existing.Title = postDto.Title;
+            existing.Content = postDto.Content;
+            existing.Preview = postDto.Preview;
+            existing.Lastmodifieddate = DateTime.UtcNow;
+
+            var result = await _blogRepository.UpdateAsync(existing.Id, existing);
+            
+            return new SaveBlogResponseDTO { IsSaved = result > 0, PostGuid = existing.Id };
         }
     }
 }

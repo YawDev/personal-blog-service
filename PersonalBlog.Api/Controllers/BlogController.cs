@@ -1,9 +1,9 @@
 using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using PersonalBlog.Api.ActionFilters;
 using PersonalBlog.Api.Contracts.Request;
 using PersonalBlog.Api.Contracts.Response.Blogs;
+using PersonalBlog.Core.Dtos.RequestDtos;
 using PersonalBlog.Core.Interfaces.Business;
 using PersonalBlog.Models.Dtos;
 
@@ -38,17 +38,43 @@ namespace PersonalBlog.Api.Controllers
             return Ok(response);
         }
 
-        [IdentityFilter]
+        [Authorize]
         [HttpPost("/blogs/create/{id}")]
         public async Task<IActionResult> CreateBlog(Guid id, [FromBody] CreateBlogRequest createBlogRequest)
         {
             var createBlogDTO = _mapper.Map<CreateBlogDTO>(createBlogRequest);
 
             var createdBlog = await _blogService.CreatePostAsync(createBlogDTO, id);
-            
+
             var response = _mapper.Map<SaveBlogResponse>(createdBlog);
 
-            return Ok(response);            
+            return Ok(response);
+        }
+
+        [Authorize]
+        [HttpPut("/blogs/{postId}/users/{id}")]
+        public async Task<IActionResult> UpdateBlog(Guid id, Guid postId, [FromBody] UpdateBlogRequest updateBlogRequest)
+        {
+            updateBlogRequest.Id = postId;
+            var postDto = _mapper.Map<PostDTO>(updateBlogRequest);
+            var result = await _blogService.UpdatePostAsync(postDto, id);
+
+            if (!result.IsSaved)
+                return NotFound();
+
+            return Ok(_mapper.Map<SaveBlogResponse>(result));
+        }
+
+        [Authorize]
+        [HttpDelete("/blogs/{postId}/users/{id}/delete")]
+        public async Task<IActionResult> DeleteBlog(Guid id, Guid postId)
+        {
+            var result = await _blogService.DeletePostAsync(postId, id);
+
+            if (!result.IsDeleted)
+                return NotFound();
+
+            return Ok(_mapper.Map<DeleteBlogResponse>(result));
         }
     }
 }

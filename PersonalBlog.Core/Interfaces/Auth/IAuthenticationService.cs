@@ -1,6 +1,6 @@
 using PersonalBlog.Core.Dtos;
+using PersonalBlog.Core.Dtos.RequestDtos;
 using PersonalBlog.Models.DatabaseModels;
-using PersonalBlog.Models.Dtos;
 
 namespace PersonalBlog.Core.Interfaces
 {
@@ -9,5 +9,6 @@ namespace PersonalBlog.Core.Interfaces
         Task<ApplicationUser> CreateUserAndIdentity(CreateIdentityDTO user);
         Task<(ApplicationUser, string)> AuthenticateUser(AuthenticateIdentityDTO user);
         Task<BlogUserDTO?> GetUserByIdAsync(Guid userId);
+        Task<IdentityUserDTO?> GetIdentityUserAsync(Guid identityUserId);
     }
 }

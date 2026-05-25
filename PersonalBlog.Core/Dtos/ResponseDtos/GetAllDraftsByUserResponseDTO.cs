@@ -2,6 +2,6 @@ namespace PersonalBlog.Core.Dtos.ResponseDtos
 {
     public class GetAllDraftsByUserResponseDTO
     {
-        public List<DraftDTO> UnfinishedDrafts { get; set; } = null!;
+        public List<DraftResponseDTO> UnfinishedDrafts { get; set; } = null!;
     }
 }

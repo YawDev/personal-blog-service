@@ -1,4 +1,5 @@
 using PersonalBlog.Core.Dtos;
+using PersonalBlog.Core.Dtos.RequestDtos;
 using PersonalBlog.Models.DatabaseModels;
 
 namespace PersonalBlog.Core.Interfaces.Repositories
@@ -13,7 +14,8 @@ namespace PersonalBlog.Core.Interfaces.Repositories
         Task<BlogUserDTO?> GetByIdAsync(Guid userId);
         Task<ApplicationUser?> GetByUserNameAsync(string userName);
         Task<IdentityUserDTO?> GetIdentityUserInfoAsync(Guid id);
-        Task<ApplicationUser> UpdateAsync(ApplicationUser user);
+        Task<bool> UpdateIdentityUserAsync(Guid identityUserId, EditAccountDTO editAccountRequest);
+        Task<bool> UpdateBlogUserAsync(Guid identityUserId, EditAccountDTO editAccount);
         Task<bool> ValidateCredentialsAsync(string userName, string passwordHash);
     }
 }

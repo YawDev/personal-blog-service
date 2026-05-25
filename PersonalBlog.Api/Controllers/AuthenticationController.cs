@@ -4,20 +4,24 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using PersonalBlog.Api.ActionFilters;
 using PersonalBlog.Api.Contracts.Request;
+using PersonalBlog.Api.Contracts.Response.Auth;
+using PersonalBlog.Api.Contracts.Response.Blogs;
 using PersonalBlog.Core.Dtos;
+using PersonalBlog.Core.Dtos.RequestDtos;
 using PersonalBlog.Core.Interfaces;
 using PersonalBlog.Models.DatabaseModels;
-using PersonalBlog.Models.Dtos;
+using System.Security.Claims;
 
 namespace PersonalBlog.Api.Controllers
 {
 
     [ApiController]
     [Route("api")]
-    public class AuthenticationController(IAuthenticationService authenticationService, IMapper mapper, SignInManager<ApplicationUser> signInManager) : ControllerBase
+    public class AuthenticationController(IAuthenticationService authenticationService, IMapper mapper, SignInManager<ApplicationUser> signInManager, IUserIdentityService userIdentityService) : ControllerBase
     {
         private readonly SignInManager<ApplicationUser> _signInManager = signInManager;
         private readonly IAuthenticationService _authenticationService = authenticationService;
+        private readonly IUserIdentityService _userIdentityService = userIdentityService;
         private readonly IMapper _mapper = mapper;
 
         [AllowAnonymous]
@@ -26,8 +30,24 @@ namespace PersonalBlog.Api.Controllers
         {
             var identityDTO = _mapper.Map<AuthenticateIdentityDTO>(request);
             var (user, token) = await _authenticationService.AuthenticateUser(identityDTO);
+            if (user == null)
+            {
+                return Unauthorized("Failed to authenticate credentials.");
+            }
+            
+            Response.Cookies.Append("access_token", token, new CookieOptions
+            {
+                HttpOnly = true,
+                Secure = true,
+                SameSite = SameSiteMode.None,
+                Expires = DateTimeOffset.UtcNow.AddMinutes(30)
+            });
+            
             await _signInManager.SignInAsync(user, isPersistent: false);
-            return Ok(new { User = _mapper.Map<IdentityUserDTO>(user), Token = token });
+            return Ok(new LoginResponse()
+            {
+                    User = _mapper.Map<IdentityUserResponse>(user)
+            });
         }
 
         [AllowAnonymous]
@@ -74,6 +94,57 @@ namespace PersonalBlog.Api.Controllers
             // Retrieve the pre-validated user from HttpContext
             var identityUser = HttpContext.Items["AuthenticatedIdentity"] as IdentityUserDTO;
             return Ok(identityUser);
+        }
+
+        /// <summary>
+        /// Retrieves identity information for the authenticated user.
+        /// </summary>
+        /// <returns>Identity information for the authenticated user</returns>
+        [Authorize]
+        [HttpGet("auth/me")]
+        public async Task<IActionResult> GetCurrentUser()
+        {
+            // Retrieve the pre-validated user from HttpContext
+            var userId = HttpContext.User.Claims
+            .Where(c => c.Type == ClaimTypes.NameIdentifier || c.Type == "sub")
+            .Select(c => c.Value)
+            .FirstOrDefault(v => Guid.TryParse(v, out _));
+
+            if (userId == null) return Unauthorized();
+
+            var user = await _authenticationService.GetIdentityUserAsync(Guid.Parse(userId));
+            return Ok(new CheckIdentityResponse()
+            {
+                User = _mapper.Map<IdentityUserResponse>(user)
+            });
+        }
+        
+        /// <summary>
+        /// Allows user to edit account details for profile
+        /// </summary>
+        /// <returns>Success or failure for account edit</returns>
+        [Authorize]
+        [HttpPut("account/edit/{id}")]
+        public async Task<IActionResult> EditAccount(Guid id, [FromBody] EditAccountRequest editAccountRequest)
+        {
+            // Retrieve the pre-validated user from HttpContext
+            var userId = HttpContext.User.Claims
+            .Where(c => c.Type == ClaimTypes.NameIdentifier || c.Type == "sub")
+            .Select(c => c.Value)
+            .FirstOrDefault(v => Guid.TryParse(v, out _));
+
+            if (userId == null || id != Guid.Parse(userId)) return Unauthorized();
+
+            var user = await _authenticationService.GetIdentityUserAsync(Guid.Parse(userId));
+            
+            // Update the user's account details in the system
+            var updateResult = await _userIdentityService.UpdateUserAsync(Guid.Parse(userId), _mapper.Map<EditAccountDTO>(editAccountRequest));
+            
+            return Ok(new EditAccountResponse()
+            {
+                IsUpdated = updateResult,
+                UserGuid = Guid.Parse(userId)
+            });        
         }
     }
 }

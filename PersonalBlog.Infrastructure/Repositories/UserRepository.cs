@@ -2,6 +2,7 @@ using AutoMapper;
 using AutoMapper.QueryableExtensions;
 using Microsoft.EntityFrameworkCore;
 using PersonalBlog.Core.Dtos;
+using PersonalBlog.Core.Dtos.RequestDtos;
 using PersonalBlog.Core.Interfaces.Repositories;
 using PersonalBlog.Models.DatabaseModels;
 
@@ -71,11 +72,33 @@ namespace PersonalBlog.Infrastructure.Repositories
             return existingUser;
         }
 
-        public async Task<ApplicationUser> UpdateAsync(ApplicationUser user)
+        public async Task<bool> UpdateBlogUserAsync(Guid identityUserId, EditAccountDTO editAccountRequest)
         {
-            _context.ApplicationUsers.Update(user);
-            await _context.SaveChangesAsync();
-            return user;
+            // Also update linked FK BlogUser table with same changes to avoid data inconsistency
+            var blogUser = await _context.BlogUsers.FirstOrDefaultAsync(u => u.IdentityUserId == identityUserId);
+            
+            blogUser.Lastmodifieddate = DateTime.UtcNow;
+            blogUser.Username = editAccountRequest.UserName;
+            blogUser.Email = editAccountRequest.Email;
+
+            _context.BlogUsers.Update(blogUser);
+            return await _context.SaveChangesAsync() > 0;
+        }
+
+        public async Task<bool> UpdateIdentityUserAsync(Guid identityUserId, EditAccountDTO editAccountRequest)
+        {
+            var identityUser = await _context.ApplicationUsers.FirstOrDefaultAsync(u => u.Id == identityUserId);
+            if (identityUser == null) return false;
+
+            identityUser.UserName = editAccountRequest.UserName;
+            identityUser.Email = editAccountRequest.Email;
+            identityUser.NormalizedUserName = editAccountRequest.UserName.ToUpper();
+            identityUser.NormalizedEmail = editAccountRequest.Email.ToUpper();
+            // identityUser.FirstName = editAccountRequest.FirstName;
+            // identityUser.LastName = editAccountRequest.LastName;
+
+            _context.ApplicationUsers.Update(identityUser);
+            return await _context.SaveChangesAsync() > 0;
         }
 
         public async Task<bool> ValidateCredentialsAsync(string userName, string passwordHash)

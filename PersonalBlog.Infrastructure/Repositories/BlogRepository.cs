@@ -52,9 +52,48 @@ namespace PersonalBlog.Infrastructure.Repositories
             return post;
         }
 
-        public async Task<int> UpdateAsync(Post post)
+        public async Task<(bool, Guid? newPostId)> PublishBlogPost(Guid draftId, Guid userId, PostDTO post)
         {
-            _context.Posts.Update(post);
+            var query = await _context.Drafts
+                .Include(d => d.User)
+                .Select(d => new
+                {
+                    Draft = d,
+                    BlogUser = d.User
+                })
+                .FirstOrDefaultAsync(d => d.Draft.Id == draftId);
+            if (query == null) return (false, null);
+
+            if (query.BlogUser.IdentityUserId != userId)
+                throw new UnauthorizedAccessException("You do not have permission to publish this draft.");
+
+            var newPost = new Post
+            {
+                Id = Guid.NewGuid(),
+                Userid = query.BlogUser.Id,
+                Title = post.Title,
+                Content = post.Content,
+                Preview = post.Preview ?? string.Empty,
+                Createddate = DateTime.UtcNow,
+                Lastmodifieddate = DateTime.UtcNow
+            };
+
+            _context.Posts.Add(newPost);
+            _context.Drafts.Remove(query.Draft);
+            return (await _context.SaveChangesAsync() > 0, newPost.Id);
+        }
+
+        public async Task<int> UpdateAsync(Guid postId, PostDTO post)
+        {
+            var existingPost = await _context.Posts.FindAsync(postId);
+            if (existingPost == null) return 0;
+
+            existingPost.Title = post.Title;
+            existingPost.Content = post.Content;
+            existingPost.Preview = post.Preview;
+            existingPost.Lastmodifieddate = DateTime.UtcNow;
+
+            _context.Posts.Update(existingPost);
             return await _context.SaveChangesAsync();
         }
     }

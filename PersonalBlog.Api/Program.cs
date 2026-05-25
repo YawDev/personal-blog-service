@@ -1,4 +1,5 @@
 using System.Text;
+using Microsoft.Extensions.Configuration;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -111,13 +112,20 @@ builder.Services.AddAuthentication(options =>
             IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"] ?? throw new InvalidOperationException("JWT Key not configured")))
         };
     });
-    
+
+var domainList = builder.Configuration
+    .GetSection("CorsOriginSettings:DomainList")
+    .Get<string[]>()?
+    .Where(origin => !string.IsNullOrWhiteSpace(origin))
+    .Select(origin => origin.Trim())
+    .ToArray() ?? [];
+
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowFrontend",
         policy =>
         {
-            policy.WithOrigins("http://localhost:3000") 
+            policy.WithOrigins(domainList) 
                   .AllowAnyHeader()
                   .AllowAnyMethod();
         });
