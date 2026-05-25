@@ -80,7 +80,7 @@ namespace PersonalBlog.Core.BusinessContext
             if (existing == null)
                 return new DeleteDraftResponseDTO { IsDeleted = false, DraftGuid = draftId };
 
-            if (existing.Userid != userId)
+            if (existing.User.IdentityUserId != userId)
                 throw new Exceptions.UnauthorizedException("You are not authorized to delete this draft.");
 
             var deleted = await _draftRepository.DeleteAsync(draftId);
@@ -195,8 +195,8 @@ namespace PersonalBlog.Core.BusinessContext
 
         public async Task<SaveBlogResponseDTO> PublishPostAsync(PostDTO postDto, Guid userId, Guid draftId)
         {
-            var result = await _blogRepository.PublishBlogPost(draftId, userId, postDto);
-            return new SaveBlogResponseDTO { IsSaved = result, PostGuid = postDto.Id };
+            var (result, newPostId) = await _blogRepository.PublishBlogPost(draftId, userId, postDto);
+            return new SaveBlogResponseDTO { IsSaved = result, PostGuid = newPostId ?? Guid.Empty };
         }
 
         public async Task<SaveDraftResponseDTO> UpdateDraftAsync(Guid userId, Guid draftId, SaveDraftDTO draftDto)
@@ -208,9 +208,8 @@ namespace PersonalBlog.Core.BusinessContext
         public async Task<SaveBlogResponseDTO> UpdatePostAsync(PostDTO postDto, Guid userId)
         {
             if (string.IsNullOrWhiteSpace(postDto.Title) ||
-                string.IsNullOrWhiteSpace(postDto.Content) ||
                 string.IsNullOrWhiteSpace(postDto.Preview))
-                throw new Exceptions.BadRequestException("Title, content, and preview are required.");
+                throw new Exceptions.BadRequestException("Title and preview are required.");
 
             var existing = await _blogRepository.GetByIdAsync(postDto.Id);
             if (existing == null)

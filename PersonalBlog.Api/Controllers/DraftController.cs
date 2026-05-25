@@ -73,7 +73,7 @@ namespace PersonalBlog.Api.Controllers
         [HttpPost("/drafts/{draftId}/users/{userId}/publish")]
         public async Task<IActionResult> PublishDraft(Guid userId, Guid draftId, [FromBody] CreateBlogRequest publishBlogRequest)
         {
-            var result = await _blogService.PublishPostAsync(new PostDTO { Title = publishBlogRequest.Title, Content = publishBlogRequest.Content }, userId, draftId);
+            var result = await _blogService.PublishPostAsync(new PostDTO { Title = publishBlogRequest.Title, Preview = publishBlogRequest.Preview, Content = publishBlogRequest.Content }, userId, draftId);
 
             if (!result.IsSaved)
                 return BadRequest("Failed to publish blog post");
