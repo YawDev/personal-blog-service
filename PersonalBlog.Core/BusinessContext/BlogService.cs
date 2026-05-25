@@ -21,23 +21,29 @@ namespace PersonalBlog.Core.BusinessContext
             _userRepository = userRepository;
         }
 
-        public async Task<SaveDraftResponseDTO> CreateDraftAsync(DraftDTO draftDto)
+        public async Task<SaveDraftResponseDTO> CreateDraftAsync(Guid userId, SaveDraftDTO draftDto)
         {
-           var result = await _draftRepository.CreateAsync(new Draft
+            var user = await _userRepository.GetByIdAsync(userId);
+            if (user == null)           
+            {
+                throw new Exception("User not found");
+            }
+
+           var (draftId, result) = await _draftRepository.CreateAsync(new Draft
            {
                Id = Guid.NewGuid(),
-               Userid = draftDto.Userid,
+               Userid = user.Id,
                Title = draftDto.Title,
                Content = draftDto.Content,
                Preview = draftDto.Preview,
                Createdon = DateTime.UtcNow,
-               Lastmodifieddate = DateTime.UtcNow
+               Lastmodifieddate = DateTime.UtcNow,
            });
 
            return new SaveDraftResponseDTO
            {
                IsSaved = result > 0,
-               DraftGuid = draftDto.Id
+               DraftGuid = draftId
            };
         }
 
@@ -99,18 +105,19 @@ namespace PersonalBlog.Core.BusinessContext
             var drafts = await _draftRepository.GetByUserIdAsync(userId);
             if(drafts == null || drafts.Count == 0)
             {
-                return new GetAllDraftsByUserResponseDTO { UnfinishedDrafts = new List<DraftDTO>() };
+                return new GetAllDraftsByUserResponseDTO { UnfinishedDrafts = new List<DraftResponseDTO>() };
             }
 
             return new GetAllDraftsByUserResponseDTO
             {
-                UnfinishedDrafts = drafts.Select(draft => new DraftDTO
+                UnfinishedDrafts = drafts.Select(draft => new DraftResponseDTO
                 {
                     Id = draft.Id,
                     Title = draft.Title,
                     Content = draft.Content,
                     Preview = draft.Preview,
-                    Createdon = draft.Createdon
+                    CreatedOn = draft.Createdon,
+                    UserId = draft.Userid
                 }).ToList()
             };
         }
@@ -142,20 +149,21 @@ namespace PersonalBlog.Core.BusinessContext
                throw new Exception("Draft not found");
            }
 
-           if(draft.Userid != userId)
+           if(draft.User.IdentityUserId != userId)
            {
                throw new Exceptions.UnauthorizedException("You are not authorized to view this draft.");
            }
 
               return new GetDraftByIdResponseDTO
               {
-                Draft = new DraftDTO
+                Draft = new DraftResponseDTO
                 {
                      Id = draft.Id,
                      Title = draft.Title,
                      Content = draft.Content,
                      Preview = draft.Preview,
-                     Createdon = draft.Createdon
+                     CreatedOn = draft.Createdon,
+                     UserId = draft.User.IdentityUserId
                 }
               };
 

@@ -16,11 +16,24 @@ namespace PersonalBlog.Api.Controllers
         private readonly IMapper _mapper = mapper;
 
         [Authorize]
-        [HttpPut("/drafts/{draftId}/users/{id}")]
-        public async Task<IActionResult> UpdateDraft(Guid id, Guid draftId, [FromBody] SaveDraftRequest updateDraftRequest)
+        [HttpPost("/drafts/users/{userId}/create")]
+        public async Task<IActionResult> CreateDraft(Guid userId, [FromBody] SaveDraftRequest createDraftRequest)
+        {
+            var draftDto = _mapper.Map<SaveDraftDTO>(createDraftRequest);
+            var result = await _blogService.CreateDraftAsync(userId, draftDto);
+
+            if (!result.IsSaved)
+                return BadRequest("Failed to create draft");
+
+            return Ok(result);
+        }
+
+        [Authorize]
+        [HttpPut("/drafts/{draftId}/users/{userId}/edit")]
+        public async Task<IActionResult> UpdateDraft(Guid userId, Guid draftId, [FromBody] SaveDraftRequest updateDraftRequest)
         {
             var draftDto = _mapper.Map<SaveDraftDTO>(updateDraftRequest);
-            var result = await _blogService.UpdateDraftAsync(id, draftId, draftDto);
+            var result = await _blogService.UpdateDraftAsync(userId, draftId, draftDto);
 
             if (!result.IsSaved)
                 return BadRequest("Failed to update draft");
@@ -29,18 +42,26 @@ namespace PersonalBlog.Api.Controllers
         }
 
         [Authorize]
-        [HttpGet("/drafts/users/{id}")]
-        public async Task<IActionResult> GetDraftsForUser(Guid id)
+        [HttpGet("/drafts/users/{userId}")]
+        public async Task<IActionResult> GetDraftsForUser(Guid userId)
         {
-            var result = await _blogService.GetAllDraftsByUserAsync(id);         
+            var result = await _blogService.GetAllDraftsByUserAsync(userId);
             return Ok(result);
         }
 
         [Authorize]
-        [HttpDelete("/drafts/{draftId}/users/{id}/delete")]
-        public async Task<IActionResult> DeleteDraft(Guid id, Guid draftId)
+        [HttpGet("/drafts/{draftId}/users/{userId}")]
+        public async Task<IActionResult> GetDraftById(Guid userId, Guid draftId)
         {
-            var result = await _blogService.DeleteDraftAsync(draftId, id);
+            var result = await _blogService.GetDraftByIdAsync(draftId, userId);
+            return Ok(result);
+        }
+
+        [Authorize]
+        [HttpDelete("/drafts/{draftId}/users/{userId}/delete")]
+        public async Task<IActionResult> DeleteDraft(Guid userId, Guid draftId)
+        {
+            var result = await _blogService.DeleteDraftAsync(draftId, userId);
 
             if (!result.IsDeleted)
                 return NotFound();
@@ -49,10 +70,10 @@ namespace PersonalBlog.Api.Controllers
         }
 
         [Authorize]
-        [HttpDelete("/drafts/{draftId}/users/{id}/publish")]
-        public async Task<IActionResult> PublishDraft(Guid id, Guid draftId, [FromBody] CreateBlogRequest publishBlogRequest)
+        [HttpPost("/drafts/{draftId}/users/{userId}/publish")]
+        public async Task<IActionResult> PublishDraft(Guid userId, Guid draftId, [FromBody] CreateBlogRequest publishBlogRequest)
         {
-            var result = await _blogService.PublishPostAsync(new PostDTO { Title = publishBlogRequest.Title, Content = publishBlogRequest.Content }, id, draftId);
+            var result = await _blogService.PublishPostAsync(new PostDTO { Title = publishBlogRequest.Title, Content = publishBlogRequest.Content }, userId, draftId);
 
             if (!result.IsSaved)
                 return BadRequest("Failed to publish blog post");
