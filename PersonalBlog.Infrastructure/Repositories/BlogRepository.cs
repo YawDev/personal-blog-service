@@ -52,28 +52,35 @@ namespace PersonalBlog.Infrastructure.Repositories
             return post;
         }
 
-        public async Task<bool> PublishBlogPost(Guid draftId, Guid userId, PostDTO post)
+        public async Task<(bool, Guid? newPostId)> PublishBlogPost(Guid draftId, Guid userId, PostDTO post)
         {
-            var draft = await _context.Drafts.FirstOrDefaultAsync(d => d.Id == draftId);
-            if (draft == null) return false;
+            var query = await _context.Drafts
+                .Include(d => d.User)
+                .Select(d => new
+                {
+                    Draft = d,
+                    BlogUser = d.User
+                })
+                .FirstOrDefaultAsync(d => d.Draft.Id == draftId);
+            if (query == null) return (false, null);
 
-            if (draft.User.IdentityUserId != userId)
+            if (query.BlogUser.IdentityUserId != userId)
                 throw new UnauthorizedAccessException("You do not have permission to publish this draft.");
 
             var newPost = new Post
             {
                 Id = Guid.NewGuid(),
-                Userid = userId,
+                Userid = query.BlogUser.Id,
                 Title = post.Title,
                 Content = post.Content,
-                Preview = post.Preview,
+                Preview = post.Preview ?? string.Empty,
                 Createddate = DateTime.UtcNow,
                 Lastmodifieddate = DateTime.UtcNow
             };
 
             _context.Posts.Add(newPost);
-            _context.Drafts.Remove(draft);
-            return await _context.SaveChangesAsync() > 0;
+            _context.Drafts.Remove(query.Draft);
+            return (await _context.SaveChangesAsync() > 0, newPost.Id);
         }
 
         public async Task<int> UpdateAsync(Guid postId, PostDTO post)
