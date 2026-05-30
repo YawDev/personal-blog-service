@@ -208,7 +208,7 @@ namespace PersonalBlog.Core.BusinessContext
         public async Task<SaveBlogResponseDTO> UpdatePostAsync(PostDTO postDto, Guid userId)
         {
             if (string.IsNullOrWhiteSpace(postDto.Title) ||
-                string.IsNullOrWhiteSpace(postDto.Preview))
+                string.IsNullOrWhiteSpace(postDto.Content))
                 throw new Exceptions.BadRequestException("Title and preview are required.");
 
             var existing = await _blogRepository.GetByIdAsync(postDto.Id);
