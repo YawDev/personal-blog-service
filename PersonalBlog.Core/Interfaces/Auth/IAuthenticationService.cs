@@ -10,6 +10,8 @@ namespace PersonalBlog.Core.Interfaces
         Task<(ApplicationUser?, string? accessToken, string? refreshToken)> AuthenticateUser(AuthenticateIdentityDTO user);
         Task<BlogUserDTO?> GetUserByIdAsync(Guid userId);
         Task<IdentityUserDTO?> GetIdentityUserAsync(Guid identityUserId);
-        Task<RefreshToken?> GetAndValidateRefreshToken(string refreshToken);
+        Task<bool> SaveNewRefreshToken(string newRefreshTokenString, Guid identityUserId);
+        Task<(ApplicationUser user, string newAccessToken, string newRefreshToken)> RefreshUserSession(string oldRefreshToken);
+
     }
 }
