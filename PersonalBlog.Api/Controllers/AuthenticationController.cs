@@ -17,11 +17,13 @@ namespace PersonalBlog.Api.Controllers
 
     [ApiController]
     [Route("api")]
-    public class AuthenticationController(IAuthenticationService authenticationService, IMapper mapper, SignInManager<ApplicationUser> signInManager, IUserIdentityService userIdentityService) : ControllerBase
+    public class AuthenticationController(IConfiguration configuration, IAuthenticationService authenticationService, IMapper mapper, SignInManager<ApplicationUser> signInManager, IUserIdentityService userIdentityService) : ControllerBase
     {
         private readonly SignInManager<ApplicationUser> _signInManager = signInManager;
         private readonly IAuthenticationService _authenticationService = authenticationService;
         private readonly IUserIdentityService _userIdentityService = userIdentityService;
+        private readonly int _accessTokenExpirationMinutes = int.TryParse(configuration["Jwt:AccessTokenExpirationMinutes"], out var minutes) ? minutes : 30;
+        private readonly int _refreshTokenExpirationDays = int.TryParse(configuration["Jwt:RefreshTokenExpirationDays"], out var days) ? days : 7;
         private readonly IMapper _mapper = mapper;
 
         [AllowAnonymous]
@@ -29,18 +31,26 @@ namespace PersonalBlog.Api.Controllers
         public async Task<IActionResult> Login([FromBody] LoginRequest request)
         {
             var identityDTO = _mapper.Map<AuthenticateIdentityDTO>(request);
-            var (user, token) = await _authenticationService.AuthenticateUser(identityDTO);
+            var (user, accessToken, refreshToken) = await _authenticationService.AuthenticateUser(identityDTO);
             if (user == null)
             {
                 return Unauthorized("Failed to authenticate credentials.");
             }
 
-            Response.Cookies.Append("access_token", token, new CookieOptions
+            Response.Cookies.Append("access_token", accessToken, new CookieOptions
             {
                 HttpOnly = true,
                 Secure = true,
                 SameSite = SameSiteMode.None,
-                Expires = DateTimeOffset.UtcNow.AddMinutes(30)
+                Expires = DateTimeOffset.UtcNow.AddMinutes(_accessTokenExpirationMinutes)
+            });
+
+            Response.Cookies.Append("refresh_token", refreshToken, new CookieOptions
+            {
+                HttpOnly = true,
+                Secure = true,
+                SameSite = SameSiteMode.None,
+                Expires = DateTimeOffset.UtcNow.AddDays(_refreshTokenExpirationDays)
             });
 
             await _signInManager.SignInAsync(user, isPersistent: false);

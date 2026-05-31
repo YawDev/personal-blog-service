@@ -22,11 +22,6 @@ public partial class PersonalBlogDbContext : IdentityDbContext<ApplicationUser, 
     public virtual DbSet<Post> Posts { get; set; }
     public virtual DbSet<ApplicationUser> ApplicationUsers { get; set; }
     public virtual DbSet<RefreshToken> RefreshTokens { get; set; }
-
-    // protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-    //     => optionsBuilder.UseNpgsql("Host=localhost;Port=5432;Database=postgres;Username=postgres;Password=p1");
-
-
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
@@ -132,6 +127,35 @@ public partial class PersonalBlogDbContext : IdentityDbContext<ApplicationUser, 
             entity.HasOne(d => d.User).WithMany(p => p.Posts)
                 .HasForeignKey(d => d.Userid)
                 .HasConstraintName("fk_posts_user");
+        });
+
+        modelBuilder.Entity<RefreshToken>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("refresh_tokens_pkey");
+
+            entity.ToTable("refresh_tokens");
+
+            entity.Property(e => e.Id)
+                .ValueGeneratedNever()
+                .HasColumnName("id");
+            entity.Property(e => e.Token)
+                .HasMaxLength(500)
+                .HasColumnName("token");
+            entity.Property(e => e.IdentityUserId).HasColumnName("identity_user_id");
+            entity.Property(e => e.ExpiresAt).HasColumnName("expires_at");
+            entity.Property(e => e.IsRevoked).HasColumnName("is_revoked");
+            entity.Property(e => e.IsUsed).HasColumnName("is_used");
+            entity.Property(e => e.CreatedAt)
+                .HasDefaultValueSql("CURRENT_TIMESTAMP")
+                .HasColumnName("created_at");
+
+            entity.Ignore(e => e.IsExpired);
+            entity.Ignore(e => e.IsActive);
+
+            entity.HasOne(e => e.IdentityUser)
+                .WithMany()
+                .HasForeignKey(e => e.IdentityUserId)
+                .HasConstraintName("fk_refresh_tokens_identity_user");
         });
 
         OnModelCreatingPartial(modelBuilder);

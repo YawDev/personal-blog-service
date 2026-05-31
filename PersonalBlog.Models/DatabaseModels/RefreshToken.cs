@@ -12,5 +12,7 @@
         public DateTime CreatedAt { get; set; }
         public bool IsExpired => DateTime.UtcNow >= ExpiresAt;
         public bool IsActive => !IsExpired && !IsRevoked && !IsUsed;
+
+        public ApplicationUser? IdentityUser { get; set; }
     }
 }

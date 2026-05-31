@@ -4,7 +4,8 @@ namespace PersonalBlog.Core.Interfaces
 {
     public interface ITokenService
     {
-         public string GenerateAccessToken(ApplicationUser user);
+        public string GenerateAccessToken(ApplicationUser user);
         public string GenerateRefreshToken();
+        public Task<int> SaveRefreshTokenAsync(Guid userId, string refreshToken);
     }
 }

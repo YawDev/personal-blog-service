@@ -20,21 +20,25 @@ namespace PersonalBlog.Core.AuthContext
                     throw new Exception("Failed to create user and identity");
                 }
             }
-            catch (Exception e)
+            catch (Exception)
             {
                 throw;
             }
             return newUser;
         }
 
-        public async Task<(ApplicationUser, string)> AuthenticateUser(AuthenticateIdentityDTO user)
+        public async Task<(ApplicationUser?, string? accessToken, string? refreshToken)> AuthenticateUser(AuthenticateIdentityDTO user)
         {
             var (authenticatedUser, isSuccess) = await _userIdentityService.ValidateUserCredentialsAsync(user.UserName, user.Password);
             if (!isSuccess) //throw new FailedAuthenticationException("Invalid user credentials.");
-                return (null, null);
+                return (null, null, null);
 
             var accessToken = _tokenService.GenerateAccessToken(authenticatedUser);
-            return (authenticatedUser, accessToken);            
+            var refreshToken = _tokenService.GenerateRefreshToken();
+            // Save the refresh token to the database or any persistent storage associated with the user for later validation
+            await _tokenService.SaveRefreshTokenAsync(authenticatedUser.Id, refreshToken);
+
+            return (authenticatedUser, accessToken, refreshToken);            
         }
 
         public async Task<BlogUserDTO?> GetUserByIdAsync(Guid userId)
