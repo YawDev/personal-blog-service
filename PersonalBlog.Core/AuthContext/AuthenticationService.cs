@@ -1,5 +1,6 @@
 using PersonalBlog.Core.Dtos;
 using PersonalBlog.Core.Dtos.RequestDtos;
+using PersonalBlog.Core.Exceptions;
 using PersonalBlog.Core.Interfaces;
 using PersonalBlog.Models.DatabaseModels;
 
@@ -51,6 +52,15 @@ namespace PersonalBlog.Core.AuthContext
         {
             var user = await _userIdentityService.GetIdentityUserInfo(identityUserId);
             return user;
+        }
+
+        public async Task<RefreshToken> GetAndValidateRefreshToken(string refreshToken)
+        {
+            var refreshTokenEntity = await _tokenService.GetAndValidateRefreshToken(refreshToken);
+            if (refreshTokenEntity == null || !refreshTokenEntity.IsActive)
+                throw new UnauthorizedException("Invalid or expired refresh token.");
+
+            return refreshTokenEntity;
         }
     }
 }

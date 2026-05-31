@@ -7,5 +7,6 @@ namespace PersonalBlog.Core.Interfaces
         public string GenerateAccessToken(ApplicationUser user);
         public string GenerateRefreshToken();
         public Task<int> SaveRefreshTokenAsync(Guid userId, string refreshToken);
+        Task<RefreshToken?> GetAndValidateRefreshToken(string refreshToken);
     }
 }

@@ -68,5 +68,10 @@ namespace PersonalBlog.Core.AuthContext
 
            return result;
         }
+
+        public async Task<RefreshToken?> GetAndValidateRefreshToken(string refreshToken)
+        {
+            return await _refreshTokenRepository.GetByTokenAsync(refreshToken);
+        }
     }
 }

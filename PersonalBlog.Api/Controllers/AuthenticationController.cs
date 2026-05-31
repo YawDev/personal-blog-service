@@ -10,6 +10,8 @@ using PersonalBlog.Core.Dtos;
 using PersonalBlog.Core.Dtos.RequestDtos;
 using PersonalBlog.Core.Interfaces;
 using PersonalBlog.Models.DatabaseModels;
+using System.Net;
+using System.Runtime.Intrinsics.Arm;
 using System.Security.Claims;
 
 namespace PersonalBlog.Api.Controllers
@@ -76,9 +78,28 @@ namespace PersonalBlog.Api.Controllers
             return Ok("User logged out successfully");
         }
 
+        /// <summary>
+        /// Refreshes the access token using a valid refresh token cookie.
+        /// Rotates the refresh token on each use — the old token is marked as used and a new one is issued.
+        /// Returns 401 if the refresh token is missing, expired, revoked, or already used.
+        /// </summary>
+        /// <returns>Sets new access_token and refresh_token HttpOnly cookies on success</returns>
         [HttpPost("auth/refresh")]
         public async Task<IActionResult> RefreshToken()
-        {           
+        {
+            // Read refresh token cookies
+
+            // Find in DB , validate isActive
+
+            // mark old as isUsed = true
+
+            //generate new access token + new refresh token
+
+            //save new refresh token to DB
+
+            //set both as HttpOnly cookies
+
+            //return 200
             return Ok();
         }
 
