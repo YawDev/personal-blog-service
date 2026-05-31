@@ -7,8 +7,11 @@ namespace PersonalBlog.Core.Interfaces
     public interface IAuthenticationService
     {
         Task<ApplicationUser> CreateUserAndIdentity(CreateIdentityDTO user);
-        Task<(ApplicationUser, string)> AuthenticateUser(AuthenticateIdentityDTO user);
+        Task<(ApplicationUser?, string? accessToken, string? refreshToken)> AuthenticateUser(AuthenticateIdentityDTO user);
         Task<BlogUserDTO?> GetUserByIdAsync(Guid userId);
         Task<IdentityUserDTO?> GetIdentityUserAsync(Guid identityUserId);
+        Task<bool> SaveNewRefreshToken(string newRefreshTokenString, Guid identityUserId);
+        Task<(ApplicationUser user, string newAccessToken, string newRefreshToken)> RefreshUserSession(string oldRefreshToken);
+
     }
 }

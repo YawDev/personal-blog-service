@@ -72,6 +72,13 @@ namespace PersonalBlog.Infrastructure.Repositories
             return existingUser;
         }
 
+        public async Task<ApplicationUser?> GetApplicationUserAsync(Guid id)
+        {
+            var existingUser = await _context.ApplicationUsers
+                .FirstOrDefaultAsync(iu => iu.Id == id);
+            return existingUser;
+        }
+
         public async Task<bool> UpdateBlogUserAsync(Guid identityUserId, EditAccountDTO editAccountRequest)
         {
             // Also update linked FK BlogUser table with same changes to avoid data inconsistency
