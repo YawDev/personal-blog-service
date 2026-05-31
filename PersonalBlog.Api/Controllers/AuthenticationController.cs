@@ -34,7 +34,7 @@ namespace PersonalBlog.Api.Controllers
             {
                 return Unauthorized("Failed to authenticate credentials.");
             }
-            
+
             Response.Cookies.Append("access_token", token, new CookieOptions
             {
                 HttpOnly = true,
@@ -42,11 +42,11 @@ namespace PersonalBlog.Api.Controllers
                 SameSite = SameSiteMode.None,
                 Expires = DateTimeOffset.UtcNow.AddMinutes(30)
             });
-            
+
             await _signInManager.SignInAsync(user, isPersistent: false);
             return Ok(new LoginResponse()
             {
-                    User = _mapper.Map<IdentityUserResponse>(user)
+                User = _mapper.Map<IdentityUserResponse>(user)
             });
         }
 
@@ -66,7 +66,13 @@ namespace PersonalBlog.Api.Controllers
             return Ok("User logged out successfully");
         }
 
-        
+        [HttpPost("auth/refresh")]
+        public async Task<IActionResult> RefreshToken()
+        {           
+            return Ok();
+        }
+
+
         /// <summary>
         /// Retrieves user information for the authenticated user.
         /// The id is passed as a parameter and used to retrieve data for the signed-in user.

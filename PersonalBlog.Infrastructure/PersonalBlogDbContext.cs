@@ -18,11 +18,10 @@ public partial class PersonalBlogDbContext : IdentityDbContext<ApplicationUser, 
     }
 
     public virtual DbSet<BlogUser> BlogUsers { get; set; }
-
     public virtual DbSet<Draft> Drafts { get; set; }
-
     public virtual DbSet<Post> Posts { get; set; }
     public virtual DbSet<ApplicationUser> ApplicationUsers { get; set; }
+    public virtual DbSet<RefreshToken> RefreshTokens { get; set; }
 
     // protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     //     => optionsBuilder.UseNpgsql("Host=localhost;Port=5432;Database=postgres;Username=postgres;Password=p1");
