@@ -70,6 +70,11 @@ namespace PersonalBlog.Core.AuthContext
             return await _userRepository.GetByUserNameAsync(userName);
         }
 
+        public async Task<ApplicationUser?> GetApplicationUserAsync(Guid id)
+        {
+            return await _userRepository.GetApplicationUserAsync(id);
+        }
+
         public async Task<bool> UpdateUserAsync(Guid userId, EditAccountDTO editAccountRequest)
         {
             // Update the user's account details in the identity system

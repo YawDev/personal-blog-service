@@ -12,4 +12,9 @@ namespace PersonalBlog.Api.Contracts.Response.Auth
     {
         public IdentityUserResponse User { get; set; } = default!;
     }
+
+    public class RefreshUserSessionResponse
+    {
+        public IdentityUserResponse User { get; set; } = default!;
+    }
 }

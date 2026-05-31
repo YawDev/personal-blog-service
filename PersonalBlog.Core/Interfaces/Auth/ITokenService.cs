@@ -6,6 +6,9 @@ namespace PersonalBlog.Core.Interfaces
     {
         public string GenerateAccessToken(ApplicationUser user);
         public string GenerateRefreshToken();
-        public Task<int> SaveRefreshTokenAsync(Guid userId, string refreshToken);
+        public Task<int> SaveRefreshTokenAsync(Guid userId, string refreshTokenString);
+        Task<RefreshToken?> GetAndValidateRefreshToken(string refreshTokenString);
+        Task<bool> RevokeRefreshToken(RefreshToken refreshToken);
+        Task<int> RevokeAllForUserAsync(Guid identityUserId);
     }
 }

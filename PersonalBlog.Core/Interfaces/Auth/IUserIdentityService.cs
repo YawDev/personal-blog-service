@@ -10,6 +10,7 @@ namespace PersonalBlog.Core.Interfaces
         Task<(ApplicationUser, bool)> ValidateUserCredentialsAsync(string userName, string password);
         Task<BlogUserDTO?> GetUserByIdAsync(Guid userId);
         Task<IdentityUserDTO?> GetIdentityUserInfo(Guid userId);
+        Task<ApplicationUser?> GetApplicationUserAsync(Guid id);
         Task<bool> UpdateUserAsync(Guid userId, EditAccountDTO editAccountRequest);
     }
 }
