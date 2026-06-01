@@ -8,6 +8,7 @@ using PersonalBlog.Api.Contracts.Response.Auth;
 using PersonalBlog.Api.Contracts.Response.Blogs;
 using PersonalBlog.Core.Dtos;
 using PersonalBlog.Core.Dtos.RequestDtos;
+using PersonalBlog.Core.Exceptions;
 using PersonalBlog.Core.Interfaces;
 using PersonalBlog.Models.DatabaseModels;
 using System.Net;
@@ -74,6 +75,15 @@ namespace PersonalBlog.Api.Controllers
         [HttpPost("auth/logout")]
         public async Task<IActionResult> Logout()
         {
+            if (Request.Cookies.TryGetValue("refresh_token", out var existingRefreshToken)
+                && !string.IsNullOrWhiteSpace(existingRefreshToken))
+            {
+                await _authenticationService.RevokeUserSession(existingRefreshToken);
+            }
+
+            Response.Cookies.Delete("access_token");
+            Response.Cookies.Delete("refresh_token");
+
             await _signInManager.SignOutAsync();
             return Ok("User logged out successfully");
         }
@@ -84,23 +94,39 @@ namespace PersonalBlog.Api.Controllers
         /// Returns 401 if the refresh token is missing, expired, revoked, or already used.
         /// </summary>
         /// <returns>Sets new access_token and refresh_token HttpOnly cookies on success</returns>
+        [AllowAnonymous]
         [HttpPost("auth/refresh")]
         public async Task<IActionResult> RefreshToken()
         {
             // Read refresh token cookies
+            if (!Request.Cookies.TryGetValue("refresh_token", out var existingRefreshToken) || string.IsNullOrWhiteSpace(existingRefreshToken))
+            {
+                return Unauthorized("Missing refresh token.");
+            }
 
-            // Find in DB , validate isActive
-
-            // mark old as isUsed = true
-
-            //generate new access token + new refresh token
-
-            //save new refresh token to DB
+            var (identityUser, newAccessToken, newRefreshToken)  = await _authenticationService.RefreshUserSession(existingRefreshToken);
 
             //set both as HttpOnly cookies
+            Response.Cookies.Append("access_token", newAccessToken, new CookieOptions
+            {
+                HttpOnly = true,
+                Secure = true,
+                SameSite = SameSiteMode.None,
+                Expires = DateTimeOffset.UtcNow.AddMinutes(_accessTokenExpirationMinutes)
+            });
 
-            //return 200
-            return Ok();
+            Response.Cookies.Append("refresh_token", newRefreshToken, new CookieOptions
+            {
+                HttpOnly = true,
+                Secure = true,
+                SameSite = SameSiteMode.None,
+                Expires = DateTimeOffset.UtcNow.AddDays(_refreshTokenExpirationDays)
+            });
+
+            return Ok(new RefreshUserSessionResponse()
+            {
+                User = _mapper.Map<IdentityUserResponse>(identityUser)
+            });
         }
 
 

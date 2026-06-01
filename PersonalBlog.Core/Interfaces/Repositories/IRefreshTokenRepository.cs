@@ -6,6 +6,7 @@ namespace PersonalBlog.Core.Interfaces.Repositories
     {
         Task<int> CreateAsync(RefreshToken refreshToken);
         Task<RefreshToken?> GetByTokenAsync(string token);
-        Task<bool> RevokeAsync(string token);
+        Task<bool> RevokeAsync(RefreshToken token);
+        Task<int> RevokeAllForUserAsync(Guid identityUserId);
     }
 }

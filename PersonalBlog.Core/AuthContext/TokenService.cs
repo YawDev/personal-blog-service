@@ -73,5 +73,15 @@ namespace PersonalBlog.Core.AuthContext
         {
             return await _refreshTokenRepository.GetByTokenAsync(refreshToken);
         }
+
+        public async Task<bool> RevokeRefreshToken(RefreshToken refreshToken)
+        {
+            return await _refreshTokenRepository.RevokeAsync(refreshToken);
+        }
+
+        public async Task<int> RevokeAllForUserAsync(Guid identityUserId)
+        {
+            return await _refreshTokenRepository.RevokeAllForUserAsync(identityUserId);
+        }
     }
 }
