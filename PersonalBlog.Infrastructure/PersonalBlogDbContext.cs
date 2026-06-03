@@ -22,6 +22,8 @@ public partial class PersonalBlogDbContext : IdentityDbContext<ApplicationUser, 
     public virtual DbSet<Post> Posts { get; set; }
     public virtual DbSet<ApplicationUser> ApplicationUsers { get; set; }
     public virtual DbSet<RefreshToken> RefreshTokens { get; set; }
+    public virtual DbSet<EmailPostSendEvent> EmailPostSendEvents { get; set; }
+    
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
@@ -156,6 +158,33 @@ public partial class PersonalBlogDbContext : IdentityDbContext<ApplicationUser, 
                 .WithMany()
                 .HasForeignKey(e => e.IdentityUserId)
                 .HasConstraintName("fk_refresh_tokens_identity_user");
+        });
+
+        modelBuilder.Entity<EmailPostSendEvent>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("email_post_send_events_pkey");
+
+            entity.ToTable("email_post_send_events");
+
+            entity.HasIndex(e => e.IdentityUserId, "ix_email_post_send_events_identity_user_id");
+
+            entity.HasIndex(e => e.PostId, "ix_email_post_send_events_post_id");
+
+            entity.Property(e => e.Id)
+                .HasDefaultValueSql("gen_random_uuid()")
+                .HasColumnName("id");
+            entity.Property(e => e.IdentityUserId).HasColumnName("identity_user_id");
+            entity.Property(e => e.PostId).HasColumnName("post_id");
+            entity.Property(e => e.Recipient)
+                .HasMaxLength(320)
+                .HasColumnName("recipient");
+            entity.Property(e => e.SentOn)
+                .HasDefaultValueSql("CURRENT_TIMESTAMP")
+                .HasColumnName("sent_on");
+
+            entity.HasOne(d => d.Post).WithMany(p => p.EmailPostSendEvents)
+                .HasForeignKey(d => d.PostId)
+                .HasConstraintName("fk_email_post_send_events_post");
         });
 
         OnModelCreatingPartial(modelBuilder);
