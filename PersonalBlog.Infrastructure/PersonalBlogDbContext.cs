@@ -181,6 +181,10 @@ public partial class PersonalBlogDbContext : IdentityDbContext<ApplicationUser, 
             entity.Property(e => e.SentOn)
                 .HasDefaultValueSql("CURRENT_TIMESTAMP")
                 .HasColumnName("sent_on");
+            entity.Property(e => e.IsSuccess)
+                .HasDefaultValueSql("false")
+                .HasColumnName("is_success");
+            entity.Property(e => e.ErrorMessage).HasColumnName("error_message");
 
             entity.HasOne(d => d.Post).WithMany(p => p.EmailPostSendEvents)
                 .HasForeignKey(d => d.PostId)

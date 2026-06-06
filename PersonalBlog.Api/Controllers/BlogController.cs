@@ -11,9 +11,11 @@ namespace PersonalBlog.Api.Controllers
 {
     [ApiController]
     [Route("api")]
-    public class BlogController(IBlogService blogService, IMapper mapper) : ControllerBase
+    public class BlogController(IBlogService blogService, IMapper mapper, IEmailService emailService) : ControllerBase
     {
         private readonly IBlogService _blogService = blogService;
+        private readonly IEmailService _emailService = emailService;
+
         private readonly IMapper _mapper = mapper;
 
         [AllowAnonymous]
@@ -75,6 +77,14 @@ namespace PersonalBlog.Api.Controllers
                 return NotFound();
 
             return Ok(_mapper.Map<DeleteBlogResponse>(result));
+        }
+
+        [HttpPost("/blogs/sharelink/send-email")]
+        public async Task<IActionResult> EmailBlogLink([FromBody] SendEmailDTO sendEmailDTO)
+        {
+            var result = await _emailService.SendEmailAsync(sendEmailDTO);
+
+            return Ok(_mapper.Map<EmailSharelinkResponse>(result));
         }
     }
 }

@@ -16,4 +16,15 @@ namespace PersonalBlog.Core.Dtos.RequestDtos
         public string Preview { get; set; } = null!;
 
     }
+
+    public class SendEmailDTO
+    {
+        public Guid PostId { get; set; }
+
+        public string RecipientEmail { get; set; } = null!;
+
+        public Guid? IdentityUserId { get; set; }
+
+        public string BlogShareLink { get; set; } = null!;
+    }
 }

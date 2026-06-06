@@ -5,7 +5,7 @@ namespace PersonalBlog.Core.Interfaces.Repositories
 {
     public interface IEmailPostSendEventRepository
     {
-        Task<int> CreateAsync(EmailPostSendEvent emailPostSendEvent);
+        Task<(int, Guid)> CreateAsync(EmailPostSendEvent emailPostSendEvent);
         Task<IEnumerable<EmailPostSendEventDTO>> GetByPostIdAsync(Guid postId);
     }
 }
