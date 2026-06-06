@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 
 namespace PersonalBlog.Models.DatabaseModels;
@@ -9,6 +9,10 @@ public partial class EmailPostSendEvent
     public string Recipient { get; set; } = null!;
 
     public DateTime SentOn { get; set; }
+
+    public bool IsSuccess { get; set; }
+
+    public string? ErrorMessage { get; set; }
 
     public Guid? IdentityUserId { get; set; }
 

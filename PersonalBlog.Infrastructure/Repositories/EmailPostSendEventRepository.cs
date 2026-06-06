@@ -12,10 +12,11 @@ namespace PersonalBlog.Infrastructure.Repositories
         private readonly PersonalBlogDbContext _context = context;
         private readonly IMapper _mapper = mapper;
 
-        public async Task<int> CreateAsync(EmailPostSendEvent emailPostSendEvent)
+        public async Task<(int, Guid)> CreateAsync(EmailPostSendEvent emailPostSendEvent)
         {
             _context.EmailPostSendEvents.Add(emailPostSendEvent);
-            return await _context.SaveChangesAsync();
+            var result = await _context.SaveChangesAsync();
+            return (result, emailPostSendEvent.Id);
         }
 
         public async Task<IEnumerable<EmailPostSendEventDTO>> GetByPostIdAsync(Guid postId)
