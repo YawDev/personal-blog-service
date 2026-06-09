@@ -4,6 +4,21 @@ Personal Blog Service with API endpoints built using .Net 9 with PostgreSQL DB
 
 ---
 
+## Architecture
+
+Request flow from the browser through the Next.js BFF to the ASP.NET Core API
+and its data stores. The frontend talks only to its own BFF route handlers,
+which proxy to this API; auth uses HttpOnly cookies on the BFF and JWT Bearer on
+the API.
+
+![Personal Blog system architecture: Browser → Next.js BFF → ASP.NET Core API → PostgreSQL & email provider](docs/architecture.png)
+
+> Full-resolution vector: [docs/architecture.pdf](docs/architecture.pdf) ·
+> editable source: [docs/architecture.html](docs/architecture.html) ·
+> full endpoint reference with curls: [docs/API.md](docs/API.md)
+
+---
+
 ## `ApplicationUser` vs `BlogUser` — Why Two User Types?
 
 > This is the single most confusing part of the codebase for anyone coming in fresh. Read this section first before touching anything auth or user related.

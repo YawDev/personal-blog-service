@@ -1,0 +1,269 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Personal Blog — Frontend ↔ Backend Architecture</title>
+    <style>
+      @page {
+        size: 1240px 820px;
+        margin: 0;
+      }
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+      html,
+      body {
+        width: 1240px;
+        height: 820px;
+        font-family: -apple-system, "Segoe UI", Roboto, Helvetica, Arial,
+          sans-serif;
+        background: #ffffff;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+      }
+      svg {
+        display: block;
+      }
+      text {
+        fill: #0f172a;
+      }
+      .tier-name {
+        font-size: 15px;
+        font-weight: 700;
+        letter-spacing: 0.02em;
+      }
+      .tier-sub {
+        font-size: 10.5px;
+        font-weight: 500;
+        opacity: 0.85;
+      }
+      .comp-title {
+        font-size: 13px;
+        font-weight: 700;
+      }
+      .comp-sub {
+        font-size: 10.5px;
+        fill: #64748b;
+      }
+      .mono {
+        font-family: "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace;
+      }
+      .edge-label {
+        font-size: 11px;
+        font-weight: 600;
+        fill: #475569;
+      }
+      .edge-sub {
+        font-size: 9.5px;
+        font-weight: 500;
+        fill: #94a3b8;
+      }
+    </style>
+  </head>
+  <body>
+    <svg
+      width="1240"
+      height="820"
+      viewBox="0 0 1240 820"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <defs>
+        <filter id="cardShadow" x="-10%" y="-10%" width="120%" height="130%">
+          <feDropShadow dx="0" dy="3" stdDeviation="5" flood-color="#0f172a" flood-opacity="0.10" />
+        </filter>
+        <marker id="arrow" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="7.5" markerHeight="7.5" orient="auto-start-reverse">
+          <path d="M 0 0 L 10 5 L 0 10 z" fill="#0d9488" />
+        </marker>
+        <marker id="arrowReturn" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+          <path d="M 0 0 L 10 5 L 0 10 z" fill="#94a3b8" />
+        </marker>
+        <marker id="arrowData" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+          <path d="M 0 0 L 10 5 L 0 10 z" fill="#94a3b8" />
+        </marker>
+      </defs>
+
+      <!-- ===================== HEADER ===================== -->
+      <text x="48" y="52" font-size="25" font-weight="800">Personal Blog — System Architecture</text>
+      <text x="48" y="78" font-size="13" fill="#64748b">
+        Request flow from the browser through the Next.js BFF to the ASP.NET Core API and its data stores.
+      </text>
+
+      <!-- request-flow pill legend (top right) -->
+      <g>
+        <rect x="900" y="36" width="292" height="30" rx="15" fill="#f0fdfa" stroke="#99f6e4" />
+        <circle cx="922" cy="51" r="5" fill="#0d9488" />
+        <text x="935" y="55" font-size="11" font-weight="600" fill="#0f766e">request</text>
+        <line x1="1000" y1="51" x2="1024" y2="51" stroke="#94a3b8" stroke-width="2" stroke-dasharray="4 3" />
+        <text x="1032" y="55" font-size="11" font-weight="600" fill="#64748b">Set-Cookie / data</text>
+      </g>
+
+      <!-- ===================== TIER CARDS ===================== -->
+      <!-- Geometry: cardY=130 headerH=54 cardH=360 ; widths 244 ; gaps 56 -->
+      <!-- C1 x48  C2 x348  C3 x648  C4 x948 -->
+
+      <!-- ---------- CARD 1: Browser ---------- -->
+      <g filter="url(#cardShadow)">
+        <rect x="48" y="130" width="244" height="360" rx="14" fill="#ffffff" stroke="#e2e8f0" />
+        <path d="M48 144 a14 14 0 0 1 14 -14 h216 a14 14 0 0 1 14 14 v40 h-244 z" fill="#0d9488" />
+      </g>
+      <text x="68" y="160" class="tier-name" fill="#ffffff">Browser / Client</text>
+      <text x="68" y="177" class="tier-sub" fill="#ccfbf1">Next.js App Router · React 19</text>
+
+      <g>
+        <rect x="64" y="202" width="212" height="80" rx="9" fill="#f8fafc" stroke="#e2e8f0" />
+        <text x="80" y="226" class="comp-title">React components</text>
+        <text x="80" y="245" class="comp-sub">Blogs · BlogDetails · Drafts</text>
+        <text x="80" y="262" class="comp-sub">auth forms · AuthProvider</text>
+      </g>
+      <g>
+        <rect x="64" y="296" width="212" height="84" rx="9" fill="#f8fafc" stroke="#e2e8f0" />
+        <text x="80" y="320" class="comp-title">Service layer</text>
+        <text x="80" y="339" class="comp-sub mono">PersonalBlogService.ts</text>
+        <text x="80" y="356" class="comp-sub">bffAxios · 401 refresh interceptor</text>
+      </g>
+      <g>
+        <rect x="64" y="394" width="212" height="80" rx="9" fill="#f0fdfa" stroke="#99f6e4" />
+        <text x="80" y="418" class="comp-title">HttpOnly cookie store</text>
+        <text x="80" y="437" class="comp-sub mono">access_token</text>
+        <text x="80" y="454" class="comp-sub mono">refresh_token</text>
+      </g>
+
+      <!-- ---------- CARD 2: BFF ---------- -->
+      <g filter="url(#cardShadow)">
+        <rect x="348" y="130" width="244" height="360" rx="14" fill="#ffffff" stroke="#e2e8f0" />
+        <path d="M348 144 a14 14 0 0 1 14 -14 h216 a14 14 0 0 1 14 14 v40 h-244 z" fill="#4f46e5" />
+      </g>
+      <text x="368" y="160" class="tier-name" fill="#ffffff">Next.js BFF</text>
+      <text x="368" y="177" class="tier-sub" fill="#e0e7ff">Server-side route handlers</text>
+
+      <g>
+        <rect x="364" y="202" width="212" height="80" rx="9" fill="#f8fafc" stroke="#e2e8f0" />
+        <text x="380" y="226" class="comp-title">Route handlers</text>
+        <text x="380" y="245" class="comp-sub mono">app/api/auth/* · /blogs</text>
+        <text x="380" y="262" class="comp-sub mono">/blogById · /drafts/*</text>
+      </g>
+      <g>
+        <rect x="364" y="296" width="212" height="84" rx="9" fill="#eef2ff" stroke="#c7d2fe" />
+        <text x="380" y="320" class="comp-title">Cookie → Bearer bridge</text>
+        <text x="380" y="339" class="comp-sub">reads HttpOnly cookie, forwards as</text>
+        <text x="380" y="356" class="comp-sub mono">Authorization: Bearer &lt;jwt&gt;</text>
+      </g>
+      <g>
+        <rect x="364" y="394" width="212" height="80" rx="9" fill="#f8fafc" stroke="#e2e8f0" />
+        <text x="380" y="418" class="comp-title">HTTP client</text>
+        <text x="380" y="437" class="comp-sub mono">httpClientUtil.ts</text>
+        <text x="380" y="454" class="comp-sub">targets BACKEND_URL</text>
+      </g>
+
+      <!-- ---------- CARD 3: API ---------- -->
+      <g filter="url(#cardShadow)">
+        <rect x="648" y="130" width="244" height="360" rx="14" fill="#ffffff" stroke="#e2e8f0" />
+        <path d="M648 144 a14 14 0 0 1 14 -14 h216 a14 14 0 0 1 14 14 v40 h-244 z" fill="#7c3aed" />
+      </g>
+      <text x="668" y="160" class="tier-name" fill="#ffffff">ASP.NET Core API</text>
+      <text x="668" y="177" class="tier-sub" fill="#ede9fe">JWT Bearer · layered</text>
+
+      <g>
+        <rect x="664" y="202" width="212" height="80" rx="9" fill="#f8fafc" stroke="#e2e8f0" />
+        <text x="680" y="226" class="comp-title">Controllers</text>
+        <text x="680" y="245" class="comp-sub">Authentication · Blog · Draft</text>
+        <text x="680" y="262" class="comp-sub">[Authorize] · [IdentityFilter]</text>
+      </g>
+      <g>
+        <rect x="664" y="296" width="212" height="84" rx="9" fill="#f8fafc" stroke="#e2e8f0" />
+        <text x="680" y="320" class="comp-title">Core (business)</text>
+        <text x="680" y="339" class="comp-sub">Blog · Auth · Token · Email svc</text>
+        <text x="680" y="356" class="comp-sub">DTOs · AutoMapper</text>
+      </g>
+      <g>
+        <rect x="664" y="394" width="212" height="80" rx="9" fill="#f8fafc" stroke="#e2e8f0" />
+        <text x="680" y="418" class="comp-title">Infrastructure</text>
+        <text x="680" y="437" class="comp-sub">EF Core · PersonalBlogDbContext</text>
+        <text x="680" y="454" class="comp-sub">repositories</text>
+      </g>
+
+      <!-- ---------- CARD 4: Data & Services ---------- -->
+      <g filter="url(#cardShadow)">
+        <rect x="948" y="130" width="244" height="360" rx="14" fill="#ffffff" stroke="#e2e8f0" />
+        <path d="M948 144 a14 14 0 0 1 14 -14 h216 a14 14 0 0 1 14 14 v40 h-244 z" fill="#ea580c" />
+      </g>
+      <text x="968" y="160" class="tier-name" fill="#ffffff">Data &amp; Services</text>
+      <text x="968" y="177" class="tier-sub" fill="#ffedd5">Persistence &amp; integrations</text>
+
+      <g>
+        <rect x="964" y="216" width="212" height="108" rx="9" fill="#fff7ed" stroke="#fed7aa" />
+        <text x="980" y="244" class="comp-title">PostgreSQL</text>
+        <text x="980" y="265" class="comp-sub">posts · drafts · blog_users</text>
+        <text x="980" y="283" class="comp-sub">refresh_tokens</text>
+        <text x="980" y="301" class="comp-sub">ASP.NET Identity tables</text>
+      </g>
+      <g>
+        <rect x="964" y="344" width="212" height="100" rx="9" fill="#fff7ed" stroke="#fed7aa" />
+        <text x="980" y="372" class="comp-title">Email provider</text>
+        <text x="980" y="393" class="comp-sub">third-party · share-link emails</text>
+        <text x="980" y="411" class="comp-sub">EmailService → provider SDK</text>
+        <text x="980" y="430" class="comp-sub" fill="#c2410c">anonymous endpoint</text>
+      </g>
+
+      <!-- ===================== CONNECTORS (straight, aligned) ===================== -->
+      <!-- request flow at y=300 -->
+      <line x1="292" y1="300" x2="348" y2="300" stroke="#0d9488" stroke-width="2.5" marker-end="url(#arrow)" />
+      <text x="320" y="288" text-anchor="middle" class="edge-label">fetch</text>
+      <text x="320" y="318" text-anchor="middle" class="edge-sub">same origin</text>
+
+      <line x1="592" y1="300" x2="648" y2="300" stroke="#0d9488" stroke-width="2.5" marker-end="url(#arrow)" />
+      <text x="620" y="288" text-anchor="middle" class="edge-label">HTTPS</text>
+      <text x="620" y="318" text-anchor="middle" class="edge-sub">Bearer JWT</text>
+
+      <line x1="892" y1="300" x2="948" y2="300" stroke="#94a3b8" stroke-width="2.5" marker-end="url(#arrowData)" />
+      <text x="920" y="288" text-anchor="middle" class="edge-label">EF Core</text>
+      <text x="920" y="318" text-anchor="middle" class="edge-sub">/ SMTP</text>
+
+      <!-- return: Set-Cookie from BFF back to browser, dashed at y=420 -->
+      <line x1="348" y1="425" x2="292" y2="425" stroke="#94a3b8" stroke-width="2" stroke-dasharray="5 4" marker-end="url(#arrowReturn)" />
+      <text x="320" y="447" text-anchor="middle" class="edge-sub">Set-Cookie</text>
+
+      <!-- ===================== AUTH FLOW PANEL ===================== -->
+      <rect x="48" y="528" width="1144" height="252" rx="16" fill="#f8fafc" stroke="#e2e8f0" />
+      <rect x="48" y="528" width="1144" height="46" rx="16" fill="#0f172a" />
+      <rect x="48" y="556" width="1144" height="18" fill="#0f172a" />
+      <text x="72" y="558" font-size="15" font-weight="700" fill="#ffffff">Authentication flow</text>
+      <text x="1168" y="558" text-anchor="end" font-size="11" fill="#94a3b8">JWT Bearer · HttpOnly cookies · rotating refresh tokens</text>
+
+      <!-- 4 steps, two columns -->
+      <!-- Step 1 -->
+      <circle cx="92" cy="616" r="15" fill="#0d9488" />
+      <text x="92" y="621" text-anchor="middle" font-size="14" font-weight="700" fill="#ffffff">1</text>
+      <text x="120" y="610" font-size="12.5" font-weight="700" fill="#0f172a">Login</text>
+      <text x="120" y="628" font-size="11.5" fill="#475569">POST /api/auth/login validates credentials, issues JWT +</text>
+      <text x="120" y="644" font-size="11.5" fill="#475569">refresh token; BFF sets them as HttpOnly cookies.</text>
+
+      <!-- Step 2 -->
+      <circle cx="632" cy="616" r="15" fill="#4f46e5" />
+      <text x="632" y="621" text-anchor="middle" font-size="14" font-weight="700" fill="#ffffff">2</text>
+      <text x="660" y="610" font-size="12.5" font-weight="700" fill="#0f172a">Authenticated request</text>
+      <text x="660" y="628" font-size="11.5" fill="#475569">Browser sends cookie to the BFF (same origin); the BFF</text>
+      <text x="660" y="644" font-size="11.5" fill="#475569">forwards the token as Authorization: Bearer &lt;jwt&gt;.</text>
+
+      <!-- Step 3 -->
+      <circle cx="92" cy="706" r="15" fill="#7c3aed" />
+      <text x="92" y="711" text-anchor="middle" font-size="14" font-weight="700" fill="#ffffff">3</text>
+      <text x="120" y="700" font-size="12.5" font-weight="700" fill="#0f172a">Validation</text>
+      <text x="120" y="718" font-size="11.5" fill="#475569">API validates issuer / audience / lifetime / signature.</text>
+      <text x="120" y="734" font-size="11.5" fill="#475569">[IdentityFilter] also checks sub claim == {id} route param.</text>
+
+      <!-- Step 4 -->
+      <circle cx="632" cy="706" r="15" fill="#ea580c" />
+      <text x="632" y="711" text-anchor="middle" font-size="14" font-weight="700" fill="#ffffff">4</text>
+      <text x="660" y="700" font-size="12.5" font-weight="700" fill="#0f172a">Refresh on 401</text>
+      <text x="660" y="718" font-size="11.5" fill="#475569">bffAxios interceptor calls POST /api/auth/refresh once,</text>
+      <text x="660" y="734" font-size="11.5" fill="#475569">rotates the refresh token, and replays the request.</text>
+
+      <text x="72" y="766" font-size="10.5" fill="#94a3b8">
+        Note: the .NET API reads the JWT from the Authorization header only — the cookie→Bearer translation happens in the Next.js BFF.
+      </text>
+    </svg>
+  </body>
+</html>
