@@ -12,6 +12,8 @@ namespace PersonalBlog.Api.Contracts.Response.Blogs
 
         public DateTime? DatePosted { get; set; }
 
+        public string Author { get; set; } = null!;
+
         public Guid UserId { get; set; }
     }
 }
