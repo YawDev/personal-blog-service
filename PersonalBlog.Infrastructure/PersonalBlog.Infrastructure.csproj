@@ -9,6 +9,7 @@
   <ItemGroup>
   <PackageReference Include="AutoMapper" Version="15.1.0" />
     <PackageReference Include="AutoMapper.Collection.EntityFramework" Version="11.0.0" />
+    <PackageReference Include="MailKit" Version="4.17.0" />
     <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="9.0.10" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.10">
       <PrivateAssets>all</PrivateAssets>

@@ -17,5 +17,6 @@ namespace PersonalBlog.Core.Interfaces.Repositories
         Task<bool> UpdateIdentityUserAsync(Guid identityUserId, EditAccountDTO editAccountRequest);
         Task<bool> UpdateBlogUserAsync(Guid identityUserId, EditAccountDTO editAccount);
         Task<bool> ValidateCredentialsAsync(string userName, string passwordHash);
+        Task<ApplicationUser?> GetApplicationUserAsync(Guid id);
     }
 }

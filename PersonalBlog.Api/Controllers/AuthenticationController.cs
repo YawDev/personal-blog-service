@@ -8,8 +8,11 @@ using PersonalBlog.Api.Contracts.Response.Auth;
 using PersonalBlog.Api.Contracts.Response.Blogs;
 using PersonalBlog.Core.Dtos;
 using PersonalBlog.Core.Dtos.RequestDtos;
+using PersonalBlog.Core.Exceptions;
 using PersonalBlog.Core.Interfaces;
 using PersonalBlog.Models.DatabaseModels;
+using System.Net;
+using System.Runtime.Intrinsics.Arm;
 using System.Security.Claims;
 
 namespace PersonalBlog.Api.Controllers
@@ -17,11 +20,13 @@ namespace PersonalBlog.Api.Controllers
 
     [ApiController]
     [Route("api")]
-    public class AuthenticationController(IAuthenticationService authenticationService, IMapper mapper, SignInManager<ApplicationUser> signInManager, IUserIdentityService userIdentityService) : ControllerBase
+    public class AuthenticationController(IConfiguration configuration, IAuthenticationService authenticationService, IMapper mapper, SignInManager<ApplicationUser> signInManager, IUserIdentityService userIdentityService) : ControllerBase
     {
         private readonly SignInManager<ApplicationUser> _signInManager = signInManager;
         private readonly IAuthenticationService _authenticationService = authenticationService;
         private readonly IUserIdentityService _userIdentityService = userIdentityService;
+        private readonly int _accessTokenExpirationMinutes = int.TryParse(configuration["Jwt:AccessTokenExpirationMinutes"], out var minutes) ? minutes : 30;
+        private readonly int _refreshTokenExpirationDays = int.TryParse(configuration["Jwt:RefreshTokenExpirationDays"], out var days) ? days : 7;
         private readonly IMapper _mapper = mapper;
 
         [AllowAnonymous]
@@ -29,24 +34,32 @@ namespace PersonalBlog.Api.Controllers
         public async Task<IActionResult> Login([FromBody] LoginRequest request)
         {
             var identityDTO = _mapper.Map<AuthenticateIdentityDTO>(request);
-            var (user, token) = await _authenticationService.AuthenticateUser(identityDTO);
+            var (user, accessToken, refreshToken) = await _authenticationService.AuthenticateUser(identityDTO);
             if (user == null)
             {
                 return Unauthorized("Failed to authenticate credentials.");
             }
-            
-            Response.Cookies.Append("access_token", token, new CookieOptions
+
+            Response.Cookies.Append("access_token", accessToken, new CookieOptions
             {
                 HttpOnly = true,
                 Secure = true,
                 SameSite = SameSiteMode.None,
-                Expires = DateTimeOffset.UtcNow.AddMinutes(30)
+                Expires = DateTimeOffset.UtcNow.AddMinutes(_accessTokenExpirationMinutes)
             });
-            
+
+            Response.Cookies.Append("refresh_token", refreshToken, new CookieOptions
+            {
+                HttpOnly = true,
+                Secure = true,
+                SameSite = SameSiteMode.None,
+                Expires = DateTimeOffset.UtcNow.AddDays(_refreshTokenExpirationDays)
+            });
+
             await _signInManager.SignInAsync(user, isPersistent: false);
             return Ok(new LoginResponse()
             {
-                    User = _mapper.Map<IdentityUserResponse>(user)
+                User = _mapper.Map<IdentityUserResponse>(user)
             });
         }
 
@@ -66,7 +79,48 @@ namespace PersonalBlog.Api.Controllers
             return Ok("User logged out successfully");
         }
 
-        
+        /// <summary>
+        /// Refreshes the access token using a valid refresh token cookie.
+        /// Rotates the refresh token on each use — the old token is marked as used and a new one is issued.
+        /// Returns 401 if the refresh token is missing, expired, revoked, or already used.
+        /// </summary>
+        /// <returns>Sets new access_token and refresh_token HttpOnly cookies on success</returns>
+        [AllowAnonymous]
+        [HttpPost("auth/refresh")]
+        public async Task<IActionResult> RefreshToken()
+        {
+            // Read refresh token cookies
+            if (!Request.Cookies.TryGetValue("refresh_token", out var existingRefreshToken) || string.IsNullOrWhiteSpace(existingRefreshToken))
+            {
+                return Unauthorized("Missing refresh token.");
+            }
+
+            var (identityUser, newAccessToken, newRefreshToken)  = await _authenticationService.RefreshUserSession(existingRefreshToken);
+
+            //set both as HttpOnly cookies
+            Response.Cookies.Append("access_token", newAccessToken, new CookieOptions
+            {
+                HttpOnly = true,
+                Secure = true,
+                SameSite = SameSiteMode.None,
+                Expires = DateTimeOffset.UtcNow.AddMinutes(_accessTokenExpirationMinutes)
+            });
+
+            Response.Cookies.Append("refresh_token", newRefreshToken, new CookieOptions
+            {
+                HttpOnly = true,
+                Secure = true,
+                SameSite = SameSiteMode.None,
+                Expires = DateTimeOffset.UtcNow.AddDays(_refreshTokenExpirationDays)
+            });
+
+            return Ok(new RefreshUserSessionResponse()
+            {
+                User = _mapper.Map<IdentityUserResponse>(identityUser)
+            });
+        }
+
+
         /// <summary>
         /// Retrieves user information for the authenticated user.
         /// The id is passed as a parameter and used to retrieve data for the signed-in user.

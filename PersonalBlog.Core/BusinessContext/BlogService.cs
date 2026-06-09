@@ -136,6 +136,7 @@ namespace PersonalBlog.Core.BusinessContext
                     Preview = blog.Preview,
                     DatePosted = blog.Dateposted,
                     UserId = blog.User.IdentityUserId,
+                    Author = blog.User.Username
                 }).ToList()
             };
         }
@@ -187,7 +188,8 @@ namespace PersonalBlog.Core.BusinessContext
                     Content = post.Content,
                     Preview = post.Preview,
                     DatePosted = post.Dateposted,
-                    UserId = post.User.IdentityUserId
+                    UserId = post.User.IdentityUserId,
+                    Author = post.User.Username
                 }
             };
             
@@ -208,7 +210,7 @@ namespace PersonalBlog.Core.BusinessContext
         public async Task<SaveBlogResponseDTO> UpdatePostAsync(PostDTO postDto, Guid userId)
         {
             if (string.IsNullOrWhiteSpace(postDto.Title) ||
-                string.IsNullOrWhiteSpace(postDto.Preview))
+                string.IsNullOrWhiteSpace(postDto.Content))
                 throw new Exceptions.BadRequestException("Title and preview are required.");
 
             var existing = await _blogRepository.GetByIdAsync(postDto.Id);

@@ -40,6 +40,7 @@ namespace PersonalBlog.Api.Mapping
             CreateMap<GetBlogByIdResponseDTO, GetBlogByIdResponse>();
             CreateMap<IdentityUserDTO, IdentityUserResponse>();
             CreateMap<DeleteBlogResponseDTO, DeleteBlogResponse>();
+            CreateMap<SendEmailResponseDTO, EmailSharelinkResponse>();
             #endregion
 
             #region Database Models to DTOs

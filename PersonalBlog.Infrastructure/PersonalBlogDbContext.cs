@@ -18,16 +18,12 @@ public partial class PersonalBlogDbContext : IdentityDbContext<ApplicationUser, 
     }
 
     public virtual DbSet<BlogUser> BlogUsers { get; set; }
-
     public virtual DbSet<Draft> Drafts { get; set; }
-
     public virtual DbSet<Post> Posts { get; set; }
     public virtual DbSet<ApplicationUser> ApplicationUsers { get; set; }
-
-    // protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-    //     => optionsBuilder.UseNpgsql("Host=localhost;Port=5432;Database=postgres;Username=postgres;Password=p1");
-
-
+    public virtual DbSet<RefreshToken> RefreshTokens { get; set; }
+    public virtual DbSet<EmailPostSendEvent> EmailPostSendEvents { get; set; }
+    
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
@@ -133,6 +129,66 @@ public partial class PersonalBlogDbContext : IdentityDbContext<ApplicationUser, 
             entity.HasOne(d => d.User).WithMany(p => p.Posts)
                 .HasForeignKey(d => d.Userid)
                 .HasConstraintName("fk_posts_user");
+        });
+
+        modelBuilder.Entity<RefreshToken>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("refresh_tokens_pkey");
+
+            entity.ToTable("refresh_tokens");
+
+            entity.Property(e => e.Id)
+                .ValueGeneratedNever()
+                .HasColumnName("id");
+            entity.Property(e => e.Token)
+                .HasMaxLength(500)
+                .HasColumnName("token");
+            entity.Property(e => e.IdentityUserId).HasColumnName("identity_user_id");
+            entity.Property(e => e.ExpiresAt).HasColumnName("expires_at");
+            entity.Property(e => e.IsRevoked).HasColumnName("is_revoked");
+            entity.Property(e => e.IsUsed).HasColumnName("is_used");
+            entity.Property(e => e.CreatedAt)
+                .HasDefaultValueSql("CURRENT_TIMESTAMP")
+                .HasColumnName("created_at");
+
+            entity.Ignore(e => e.IsExpired);
+            entity.Ignore(e => e.IsActive);
+
+            entity.HasOne(e => e.IdentityUser)
+                .WithMany()
+                .HasForeignKey(e => e.IdentityUserId)
+                .HasConstraintName("fk_refresh_tokens_identity_user");
+        });
+
+        modelBuilder.Entity<EmailPostSendEvent>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("email_post_send_events_pkey");
+
+            entity.ToTable("email_post_send_events");
+
+            entity.HasIndex(e => e.IdentityUserId, "ix_email_post_send_events_identity_user_id");
+
+            entity.HasIndex(e => e.PostId, "ix_email_post_send_events_post_id");
+
+            entity.Property(e => e.Id)
+                .HasDefaultValueSql("gen_random_uuid()")
+                .HasColumnName("id");
+            entity.Property(e => e.IdentityUserId).HasColumnName("identity_user_id");
+            entity.Property(e => e.PostId).HasColumnName("post_id");
+            entity.Property(e => e.Recipient)
+                .HasMaxLength(320)
+                .HasColumnName("recipient");
+            entity.Property(e => e.SentOn)
+                .HasDefaultValueSql("CURRENT_TIMESTAMP")
+                .HasColumnName("sent_on");
+            entity.Property(e => e.IsSuccess)
+                .HasDefaultValueSql("false")
+                .HasColumnName("is_success");
+            entity.Property(e => e.ErrorMessage).HasColumnName("error_message");
+
+            entity.HasOne(d => d.Post).WithMany(p => p.EmailPostSendEvents)
+                .HasForeignKey(d => d.PostId)
+                .HasConstraintName("fk_email_post_send_events_post");
         });
 
         OnModelCreatingPartial(modelBuilder);

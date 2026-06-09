@@ -4,6 +4,21 @@ Personal Blog Service with API endpoints built using .Net 9 with PostgreSQL DB
 
 ---
 
+## Architecture
+
+Request flow from the browser through the Next.js BFF to the ASP.NET Core API
+and its data stores. The frontend talks only to its own BFF route handlers,
+which proxy to this API; auth uses HttpOnly cookies on the BFF and JWT Bearer on
+the API.
+
+![Personal Blog system architecture: Browser → Next.js BFF → ASP.NET Core API → PostgreSQL & email provider](docs/architecture.png)
+
+> Full-resolution vector: [docs/architecture.pdf](docs/architecture.pdf) ·
+> editable source: [docs/architecture.html](docs/architecture.html) ·
+> full endpoint reference with curls: [docs/API.md](docs/API.md)
+
+---
+
 ## `ApplicationUser` vs `BlogUser` — Why Two User Types?
 
 > This is the single most confusing part of the codebase for anyone coming in fresh. Read this section first before touching anything auth or user related.
@@ -223,6 +238,130 @@ PostgreSQL database
       id (Guid)
       userid             ← FK → blog_users.id  (same — uses BlogUser.Id)
       title, content, preview, ...
+```
+
+---
+
+## API Endpoints & Flows
+
+### `POST /api/auth/register` — Register
+```
+Client sends { username, email, password }
+  ↓ map to CreateIdentityDTO
+  ↓ check username not already taken
+  ↓ create ApplicationUser (AspNetUsers table)
+  ↓ create BlogUser linked by IdentityUserId (blog_users table)
+  ↓ return 200
+```
+
+---
+
+### `POST /api/auth/login` — Login
+```
+Client sends { email, password }
+  ↓ validate credentials via Identity
+  ↓ generate JWT access token (30 min)
+  ↓ generate refresh token, save to DB
+  ↓ set access_token HttpOnly cookie (30 min)
+  ↓ set refresh_token HttpOnly cookie (7 days)
+  ↓ return 200 + user info
+```
+
+---
+
+### `POST /api/auth/refresh` — Token Refresh
+```
+POST /api/auth/refresh
+  ↓ read refresh_token cookie
+  ↓ find in DB → validate IsActive
+  ↓ mark old as IsUsed = true
+  ↓ generate new access token + new refresh token
+  ↓ save new refresh token to DB
+  ↓ set both as HttpOnly cookies
+  ↓ return 200
+```
+
+Refresh tokens are rotated on every use. A token that is expired, revoked, or already used returns `401`.
+
+**References:**
+- [How to Implement Refresh Tokens and Token Revocation in ASP.NET Core](https://antondevtips.com/blog/how-to-implement-refresh-tokens-and-token-revocation-in-aspnetcore)
+- [Refresh Tokens in ASP.NET Core — Medium](https://medium.com/@roshanj100/refresh-tokens-in-asp-net-core-the-key-to-secure-and-seamless-sessions-8b33324568e3)
+- [Refresh Token Rotation - Auth0 Docs](https://auth0.com/docs/secure/tokens/refresh-tokens/refresh-token-rotation)
+
+---
+
+### `POST /api/auth/logout` — Logout
+```
+Authenticated request
+  ↓ SignOutAsync via SignInManager
+  ↓ return 200
+```
+
+---
+
+### `GET /api/auth/me` — Get Current User
+```
+Authenticated request (JWT cookie)
+  ↓ extract ApplicationUser.Id from NameIdentifier claim
+  ↓ fetch identity user from DB
+  ↓ return 200 + user info
+```
+
+---
+
+### `GET /api/auth/user/{id}` — Get User Info
+```
+IdentityFilter validates JWT sub claim matches {id}
+  ↓ fetch user by id
+  ↓ return 200 + user info
+```
+
+---
+
+### `GET /api/auth/identity/{id}` — Get Identity Info
+```
+IdentityFilter validates JWT sub claim matches {id}
+  ↓ retrieve pre-validated identity from HttpContext.Items
+  ↓ return 200 + identity info
+```
+
+---
+
+### `PUT /api/account/edit/{id}` — Edit Account
+```
+Authenticated request
+  ↓ validate JWT sub claim matches {id}
+  ↓ update user details
+  ↓ return 200 + { isUpdated, userGuid }
+```
+
+---
+
+### `GET /blogs` — Get All Posts
+```
+Anonymous
+  ↓ fetch all published posts
+  ↓ return 200 + posts list
+```
+
+---
+
+### `GET /blogs/{id}` — Get Post by ID
+```
+Anonymous
+  ↓ fetch post by id
+  ↓ return 200 + post
+```
+
+---
+
+### `POST /blogs/create/{id}` — Create Post
+```
+IdentityFilter validates JWT sub claim matches {id}
+  ↓ map request to post DTO
+  ↓ resolve BlogUser.Id from ApplicationUser.Id
+  ↓ save post to DB
+  ↓ return 200
 ```
 
 ---

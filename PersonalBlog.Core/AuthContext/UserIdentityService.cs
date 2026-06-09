@@ -49,6 +49,11 @@ namespace PersonalBlog.Core.AuthContext
             return newIdentity;
         }
 
+        public async Task<ApplicationUser?> GetApplicationUserAsync(Guid id)
+        {
+            return await _userRepository.GetApplicationUserAsync(id);
+        }
+
         public async Task<IdentityUserDTO?> GetIdentityUserInfo(Guid userId)
         {
             return await _userRepository.GetIdentityUserInfoAsync(userId);

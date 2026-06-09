@@ -15,6 +15,8 @@ using PersonalBlog.Core.Interfaces.Repositories;
 using PersonalBlog.Infrastructure;
 using PersonalBlog.Infrastructure.Repositories;
 using PersonalBlog.Models.DatabaseModels;
+using PersonalBlog.Models.BusinessModels;
+using PersonalBlog.Api.ServiceExtensions;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -137,10 +139,13 @@ builder.Services.AddScoped<IBlogService, BlogService>();
 builder.Services.AddScoped<IUserIdentityService, UserIdentityService>();
 builder.Services.AddScoped<IAuthenticationService, AuthenticationService>();
 builder.Services.AddScoped<ITokenService, TokenService>();
+builder.Services.AddScoped<IEmailService, EmailService>();
 // Register Repositories for dependency injection
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IBlogRepository, BlogRepository>();
 builder.Services.AddScoped<IDraftRepository, DraftRepository>();
+builder.Services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
+builder.Services.AddScoped<IEmailPostSendEventRepository, EmailPostSendEventRepository>();
 
 
 // Register AutoMapper
@@ -148,6 +153,8 @@ builder.Services.AddAutoMapper(cfg =>
 {
     cfg.AddProfile<MapperProfile>();
 });
+
+builder.Services.AddEmailProvider(builder.Configuration);
 #endregion
 
 

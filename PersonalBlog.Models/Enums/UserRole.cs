@@ -4,5 +4,5 @@ namespace PersonalBlog.Models.Enums
     {
         Admin = 0,
         User = 1
-    }   
+    }
 }
