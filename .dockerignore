@@ -1,0 +1,17 @@
+**/bin/
+**/obj/
+**/.vs/
+**/.vscode/
+**/.git/
+**/.gitignore
+**/*.user
+**/secrets.json
+
+# Don't ship local dev config / secrets into the image
+**/appsettings.Development.json
+
+# Docs and scripts aren't needed in the image
+docs/
+*.md
+*.ps1
+fly.toml
